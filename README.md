@@ -28,7 +28,6 @@ WebDio is a high-performance, AI-driven IDE designed for rapid web development a
 
 ### 💻 Cross-Platform Support
 - **Windows, macOS, Linux**: Desktop application built with Electron
-- **Mobile Ready**: React Native Android companion app included
 
 ## 🛠️ Technology Stack
 
@@ -165,7 +164,13 @@ The app supports TypeScript with full source maps for debugging. Use DevTools:
 
 - **Decentralized**: No central server or data collection
 - **Granular Permissions**: Control read/write access on a per-project basis
- - **AI Provider Keys**: AI provider API keys are not included in the repository; configure them locally per provider's documentation (for example via environment variables) and avoid committing secrets to the repo.
+ - **AI Provider Keys**: AI provider API keys are not included in the repository; configure them locally per provider's documentation (for example via app settings). Do NOT commit secrets to the repo.
+
+## ⚙️ AI Provider Setup
+
+The application requires an AI provider API key to enable code generation features. WebDio currently supports Google Gemini via the Gemini API. You can provide credentials in app.
+
+When using the app, open Settings and paste your provider key. The app stores settings in your OS user data directory.
 
 ## 📝 License
 
