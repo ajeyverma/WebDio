@@ -2,8 +2,10 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
+let mainWindow: BrowserWindow | null = null
+
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     show: true,
@@ -111,7 +113,7 @@ ipcMain.handle('server:start', async (_event, path) => {
 })
 
 ipcMain.handle('project:select-folder', async () => {
-  const window = BrowserWindow.getFocusedWindow()
+  const window = mainWindow || BrowserWindow.getFocusedWindow()
   if (!window) return null
   return await selectFolder(window)
 })

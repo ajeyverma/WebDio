@@ -41,17 +41,71 @@ const MENUS: Record<string, MenuItemType[]> = {
     { label: 'Exit', shortcut: 'Alt+F4', action: () => window.close() }
   ],
   Edit: [
-    { label: 'Undo', shortcut: 'Ctrl+Z', action: () => document.execCommand('undo') },
-    { label: 'Redo', shortcut: 'Ctrl+Y', action: () => document.execCommand('redo') },
+    { label: 'Undo', shortcut: 'Ctrl+Z', action: () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          editor.trigger('menu', 'undo', null)
+        }
+    }},
+    { label: 'Redo', shortcut: 'Ctrl+Y', action: () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          editor.trigger('menu', 'redo', null)
+        }
+    }},
     { type: 'separator' },
-    { label: 'Cut', shortcut: 'Ctrl+X', action: () => document.execCommand('cut') },
-    { label: 'Copy', shortcut: 'Ctrl+C', action: () => document.execCommand('copy') },
+    { label: 'Cut', shortcut: 'Ctrl+X', action: async () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          const selection = editor.getSelection()
+          const model = editor.getModel()
+          if (selection && model) {
+            const text = model.getValueInRange(selection)
+            if (text) {
+              await navigator.clipboard.writeText(text)
+              editor.executeEdits('menu-cut', [{
+                range: selection,
+                text: '',
+                forceMoveMarkers: true
+              }])
+            }
+          }
+        }
+    }},
+    { label: 'Copy', shortcut: 'Ctrl+C', action: async () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          const selection = editor.getSelection()
+          const model = editor.getModel()
+          if (selection && model) {
+            const text = model.getValueInRange(selection)
+            if (text) {
+              await navigator.clipboard.writeText(text)
+            }
+          }
+        }
+    }},
     { label: 'Paste', shortcut: 'Ctrl+V', action: async () => {
-        try {
-           const text = await navigator.clipboard.readText()
-           document.execCommand('insertText', false, text)
-        } catch (err) {
-           document.execCommand('paste')
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          try {
+             const text = await navigator.clipboard.readText()
+             const selection = editor.getSelection()
+             if (selection) {
+               editor.executeEdits('menu-paste', [{
+                 range: selection,
+                 text: text,
+                 forceMoveMarkers: true
+               }])
+             }
+          } catch (err) {
+             console.error("Failed to paste from clipboard:", err)
+          }
         }
     }}
   ]

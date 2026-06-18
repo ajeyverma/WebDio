@@ -26,6 +26,8 @@ export interface AppState {
   isExecuting: boolean
   isCreatingFile: boolean
   isCreatingFolder: boolean
+  editorInstance: any
+  selectedExplorerPath: string | null
   unsavedFiles: string[]
   isJoinedCommunity: boolean
   activeTab: string
@@ -66,6 +68,8 @@ export interface AppState {
   setActiveTab: (tab: string) => void
   setIsCreatingFile: (val: boolean) => void
   setIsCreatingFolder: (val: boolean) => void
+  setEditorInstance: (editor: any) => void
+  setSelectedExplorerPath: (path: string | null) => void
   
   // --- AI Actions ---
   addChatMessage: (msg: any) => void
@@ -119,6 +123,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   isExecuting: false,
   isCreatingFile: false,
   isCreatingFolder: false,
+  editorInstance: null,
+  selectedExplorerPath: null,
   unsavedFiles: [],
   isJoinedCommunity: false,
   activeTab: 'home',
@@ -147,7 +153,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setSettingsOpen: (open) => set({ isSettingsOpen: open }),
   setRightPanelOpen: (open) => set({ isRightPanelOpen: open }),
   setProjectPath: (path) => {
-    set({ projectPath: path })
+    set({ projectPath: path, selectedExplorerPath: null })
     const { settings, setSettings } = get()
     const pData = settings.projectData?.[path]
     set({ 
@@ -158,6 +164,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setProjectFiles: (files) => set({ projectFiles: files }),
   setActiveFileName: (name) => {
+    set({ selectedExplorerPath: name })
     if (name && !get().openFiles.includes(name)) {
       set(state => ({ openFiles: [...state.openFiles, name], activeFileName: name }))
     } else {
@@ -167,7 +174,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeFile: (name) => set(state => {
     const newOpenFiles = state.openFiles.filter(f => f !== name)
     const newActive = state.activeFileName === name ? (newOpenFiles[0] || null) : state.activeFileName
-    return { openFiles: newOpenFiles, activeFileName: newActive }
+    return { openFiles: newOpenFiles, activeFileName: newActive, selectedExplorerPath: newActive }
   }),
   setViewMode: (mode) => set({ viewMode: mode }),
   setShowHidden: (val) => set({ showHidden: val }),
@@ -180,6 +187,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
   setIsCreatingFile: (val) => set({ isCreatingFile: val }),
   setIsCreatingFolder: (val) => set({ isCreatingFolder: val }),
+  setEditorInstance: (editor) => set({ editorInstance: editor }),
+  setSelectedExplorerPath: (path) => set({ selectedExplorerPath: path }),
   
   addChatMessage: (msg) => set(state => ({ chatHistory: [...state.chatHistory, msg] })),
   setCurrentPlan: (plan) => {
@@ -502,11 +511,15 @@ Build the complete multi-file website now based on the plan above.`
     set({ isJoinedCommunity: false, communityUsers: [], communityMessages: [] })
   },
   closeSharedProject: (nodeId, projectName) => {
-     set(state => ({
-        openSharedProjects: state.openSharedProjects.filter(p => !(p.nodeId === nodeId && p.projectName === projectName)),
-        openFiles: state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`)),
-        activeFileName: state.activeFileName?.startsWith(`shared-${nodeId}/`) ? (state.openFiles.find(f => !f.startsWith(`shared-${nodeId}/`)) || null) : state.activeFileName
-     }))
+     set(state => {
+        const nextActive = state.activeFileName?.startsWith(`shared-${nodeId}/`) ? (state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`))[0] || null) : state.activeFileName
+        return {
+           openSharedProjects: state.openSharedProjects.filter(p => !(p.nodeId === nodeId && p.projectName === projectName)),
+           openFiles: state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`)),
+           activeFileName: nextActive,
+           selectedExplorerPath: nextActive
+        }
+     })
   },
   initCommunity: async () => {
     // @ts-ignore

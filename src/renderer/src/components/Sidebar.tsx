@@ -75,12 +75,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
     setCommunityName,
     isJoinedCommunity,
     setActiveTab,
-    refreshCommunity
+    refreshCommunity,
+    selectedExplorerPath,
+    setSelectedExplorerPath
   } = useAppStore()
   
   const isSharing = sharedProjects.some(p => p.nodeId === 'me')
   
   const [sharePermission, setSharePermission] = useState<'read' | 'write'>('read')
+
+  const isSelectedPathFolder = useMemo(() => {
+    if (!selectedExplorerPath) return false
+    const file = projectFiles.find(f => f.name === selectedExplorerPath)
+    return !!(file && file.isDirectory)
+  }, [selectedExplorerPath, projectFiles])
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['root']))
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, path: string, type: 'file' | 'folder' } | null>(null)
   
@@ -277,7 +285,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
     })
 
     return sortedChildren.map(child => {
-      const isActive = activeFileName === child.path
+      const isActive = selectedExplorerPath === child.path
       const isCut = copiedEntry && copiedEntry.path === child.path && copiedEntry.operation === 'cut'
       return (
         <div key={child.path}>
@@ -294,7 +302,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                 draggedOverPath === child.path ? 'bg-sky-100 border-y border-[#007acc]/30' : 'hover:bg-[#e8e8e8] text-[#616161]'
               }`}
               style={{ paddingLeft: `${(depth * 12) + 12}px`, opacity: isCut ? 0.5 : 1 }}
-              onClick={() => toggleFolder(child.path)}
+              onClick={() => {
+                setSelectedExplorerPath(child.path)
+                toggleFolder(child.path)
+              }}
               onContextMenu={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -369,7 +380,64 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
           )}
           
           {child.type === 'folder' && expandedFolders.has(child.path) && (
-            <div>{renderTree(child, depth + 1)}</div>
+            <div>
+              {/* Nested Creation Input if child is selected */}
+              {isCreatingFile && selectedExplorerPath === child.path && (
+                <div 
+                  className="flex items-center gap-2 px-6 py-1 bg-white border border-[#007acc] mx-2 my-1 shadow-sm rounded-sm"
+                  style={{ marginLeft: `${(depth * 12) + 26}px` }}
+                >
+                  <FileIcon size={14} className="text-[#616161]" />
+                  <input 
+                    ref={inputRef}
+                    type="text" 
+                    value={newFileName}
+                    onChange={(e) => setNewFileName(e.target.value)}
+                    onBlur={() => setIsCreatingFile(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newFileName.trim()) {
+                        createNewFile(`${child.path}/${newFileName}`)
+                        setIsCreatingFile(false)
+                        setNewFileName('')
+                      } else if (e.key === 'Escape') {
+                        setIsCreatingFile(false)
+                        setNewFileName('')
+                      }
+                    }}
+                    placeholder="File name..."
+                    className="flex-1 bg-transparent border-none outline-none text-[12px] text-[#333333] italic"
+                  />
+                </div>
+              )}
+              {isCreatingFolder && selectedExplorerPath === child.path && (
+                <div 
+                  className="flex items-center gap-2 px-6 py-1 bg-white border border-[#007acc] mx-2 my-1 shadow-sm rounded-sm"
+                  style={{ marginLeft: `${(depth * 12) + 26}px` }}
+                >
+                  <Folder size={14} className="text-[#007acc]" />
+                  <input 
+                    ref={folderInputRef}
+                    type="text" 
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onBlur={() => setIsCreatingFolder(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newFolderName.trim()) {
+                        createNewFolder(`${child.path}/${newFolderName}`)
+                        setIsCreatingFolder(false)
+                        setNewFolderName('')
+                      } else if (e.key === 'Escape') {
+                        setIsCreatingFolder(false)
+                        setNewFolderName('')
+                      }
+                    }}
+                    placeholder="Folder name..."
+                    className="flex-1 bg-transparent border-none outline-none text-[12px] text-[#333333] italic"
+                  />
+                </div>
+              )}
+              {renderTree(child, depth + 1)}
+            </div>
           )}
         </div>
       )
@@ -464,6 +532,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                    onClick={() => {
                      setIsCreatingFile(true)
                      setIsCreatingFolder(false)
+                     if (selectedExplorerPath && isSelectedPathFolder) {
+                       setExpandedFolders(prev => {
+                         const next = new Set(prev)
+                         next.add(selectedExplorerPath)
+                         return next
+                       })
+                     }
                    }}
                    className="p-1 text-[#616161] hover:text-[#333333] hover:bg-[#e5e5e5] rounded transition-none"
                    title="New File"
@@ -474,6 +549,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                    onClick={() => {
                      setIsCreatingFolder(true)
                      setIsCreatingFile(false)
+                     if (selectedExplorerPath && isSelectedPathFolder) {
+                       setExpandedFolders(prev => {
+                         const next = new Set(prev)
+                         next.add(selectedExplorerPath)
+                         return next
+                       })
+                     }
                    }}
                    className="p-1 text-[#616161] hover:text-[#333333] hover:bg-[#e5e5e5] rounded transition-none"
                    title="New Folder"
@@ -538,9 +620,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                       Select a local folder to begin the file flow.
                     </p>
                   </div>
-                ) : projectFiles.length > 0 || Object.keys(projectTree.children).length > 0 || isCreatingFile ? (
+                ) : projectFiles.length > 0 || Object.keys(projectTree.children).length > 0 || isCreatingFile || isCreatingFolder ? (
                   <div className="py-1">
-                     {isCreatingFile && (
+                     {isCreatingFile && !isSelectedPathFolder && (
                        <div className="flex items-center gap-2 px-6 py-1 bg-white border border-[#007acc] mx-2 my-1 shadow-sm rounded-sm">
                          <FileIcon size={14} className="text-[#616161]" />
                          <input 
@@ -565,7 +647,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                        </div>
                      )}
 
-                     {isCreatingFolder && (
+                     {isCreatingFolder && !isSelectedPathFolder && (
                        <div className="flex items-center gap-2 px-6 py-1 bg-white border border-[#007acc] mx-2 my-1 shadow-sm rounded-sm">
                          <Folder size={14} className="text-[#007acc]" />
                          <input 

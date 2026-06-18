@@ -536,6 +536,9 @@ const App: React.FC = () => {
                           path={activeFileName || 'index.html'}
                           value={activeFile?.content || ''}
                           theme="vs-light"
+                          onMount={(editor) => {
+                            useAppStore.getState().setEditorInstance(editor)
+                          }}
                           loading={
                             <div className="h-full w-full flex items-center justify-center bg-white text-[#616161]">
                               <Loader2 className="animate-spin text-[#007acc] mr-3" size={20} />
