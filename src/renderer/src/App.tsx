@@ -13,7 +13,7 @@ import Editor from '@monaco-editor/react'
 import ReactMarkdown from 'react-markdown'
 import { parseProjectFiles } from './utils/fileUtils'
 import CommunityChat from './features/Community/CommunityChat'
-import { Monitor, Tablet, Smartphone, Copy, Check, Download, ExternalLink, Box, Eye, Code, MessageSquare, Bot, Sparkles, X, Loader2, Play, ListChecks, FolderOpen, AlertTriangle, RotateCw, Search, Terminal } from 'lucide-react'
+import { Monitor, Tablet, Smartphone, Copy, Check, Download, ExternalLink, Box, Eye, Code, MessageSquare, Bot, Sparkles, X, Loader2, Play, ListChecks, FolderOpen, AlertTriangle, RotateCw, Search, Terminal, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const App: React.FC = () => {
   const {
@@ -68,6 +68,22 @@ const App: React.FC = () => {
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [isEditingPlan, setIsEditingPlan] = useState(false)
   const dragCounter = useRef(0)
+
+  const tabsContainerRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const [hasOverflow, setHasOverflow] = useState(false)
+
+  const checkTabOverflow = () => {
+    const el = tabsContainerRef.current
+    if (el) {
+      const showScrollLeft = el.scrollLeft > 0
+      const showScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+      setCanScrollLeft(showScrollLeft)
+      setCanScrollRight(showScrollRight)
+      setHasOverflow(el.scrollWidth > el.clientWidth)
+    }
+  }
 
   const handleToggleSidebar = (_tab: string) => {
     setIsSidebarOpen(prev => !prev)
@@ -175,15 +191,17 @@ const App: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    checkTabOverflow()
     if (editorInstance) {
       editorInstance.layout()
-      
-      const timer = setTimeout(() => {
-        editorInstance.layout()
-      }, 250)
-      
-      return () => clearTimeout(timer)
     }
+    const timer = setTimeout(() => {
+      checkTabOverflow()
+      if (editorInstance) {
+        editorInstance.layout()
+      }
+    }, 250)
+    return () => clearTimeout(timer)
   }, [isRightPanelOpen, isSidebarOpen, sidebarWidth, aiPanelWidth, editorInstance])
 
   useEffect(() => {
@@ -194,6 +212,39 @@ const App: React.FC = () => {
     if (activeFileName !== 'Walkthrough: Plan') {
       setIsEditingPlan(false)
     }
+  }, [activeFileName])
+
+  useEffect(() => {
+    checkTabOverflow()
+    window.addEventListener('resize', checkTabOverflow)
+    return () => window.removeEventListener('resize', checkTabOverflow)
+  }, [openFiles])
+
+  useEffect(() => {
+    checkTabOverflow()
+  }, [hasOverflow])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const container = tabsContainerRef.current
+      if (container) {
+        const activeTabEl = container.querySelector('.active-tab') as HTMLElement
+        if (activeTabEl) {
+          const containerLeft = container.scrollLeft
+          const containerRight = containerLeft + container.clientWidth
+          const elemLeft = activeTabEl.offsetLeft
+          const elemRight = elemLeft + activeTabEl.clientWidth
+          
+          if (elemLeft < containerLeft) {
+            container.scrollTo({ left: elemLeft, behavior: 'smooth' })
+          } else if (elemRight > containerRight) {
+            container.scrollTo({ left: elemRight - container.clientWidth, behavior: 'smooth' })
+          }
+        }
+        checkTabOverflow()
+      }
+    }, 100)
+    return () => clearTimeout(timer)
   }, [activeFileName])
 
   const handleGenerationComplete = (code: string, image: string | null) => {
@@ -393,73 +444,111 @@ const App: React.FC = () => {
                   className="w-full h-full flex flex-col"
                 >
                   {/* Editor Tabs (VS Code Style) */}
-                  <div 
-                    className="h-[35px] bg-[#f3f3f3] flex items-center border-b border-[#e5e5e5] overflow-x-auto tab-scrollbar"
-                    onWheel={(e) => {
-                      if (e.deltaY !== 0) {
-                        e.currentTarget.scrollLeft += e.deltaY;
-                      }
-                    }}
-                  >
-                    {(openFiles.length > 0 ? openFiles : (activeFileName ? [activeFileName] : [])).filter(f => f !== 'Walkthrough: Task').map((fileName) => {
-                      const isShared = fileName.startsWith('shared-')
-                      const parts = fileName.split('/')
-                      const baseName = parts.pop()
-                      let projectColor = ''
-                      
-                      if (isShared) {
-                        const nodeId = parts[0].replace('shared-', '')
-                        const proj = openSharedProjects.find(p => p.nodeId === nodeId)
-                        projectColor = proj?.color || '#007acc'
-                      }
+                  <div className="h-[35px] bg-[#f3f3f3] flex items-center border-b border-[#e5e5e5] select-none no-drag">
+                    {/* Scroll Left Button */}
+                    {hasOverflow && (
+                      <button 
+                        disabled={!canScrollLeft}
+                        onClick={() => {
+                          tabsContainerRef.current?.scrollBy({ left: -150, behavior: 'smooth' })
+                        }}
+                        className={`h-full px-2 flex items-center justify-center transition-colors border-r border-[#e5e5e5] ${
+                          canScrollLeft ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
+                        }`}
+                        title="Scroll Tabs Left"
+                      >
+                        <ChevronLeft size={16} strokeWidth={2.5} />
+                      </button>
+                    )}
 
-                      return (
-                        <div 
-                          key={fileName}
-                          onClick={() => setActiveFileName(fileName)}
-                          className={`h-full flex items-center px-4 border-r border-[#e5e5e5] cursor-pointer text-[13px] transition-none w-auto group flex-shrink-0 relative ${
-                            activeFileName === fileName 
-                            ? `bg-white border-t-2 text-[#333333] font-semibold` 
-                            : `${isShared ? 'bg-[#f3f3f3] text-[#616161]' : 'bg-transparent text-[#616161]'} hover:bg-[#ebebeb] font-medium`
-                          }`}
-                          style={{ 
-                             borderTopColor: activeFileName === fileName ? (isShared ? projectColor : themeColor) : 'transparent'
-                          }}
-                        >
-                          {isShared && activeFileName !== fileName && (
-                             <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ backgroundColor: projectColor, opacity: 0.5 }} />
-                          )}
-                          
-                          <div className="flex items-center gap-2 mr-3">
-                             {isShared && (
-                               <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: projectColor }} />
-                             )}
-                             <span className="whitespace-nowrap">{baseName}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-center min-w-[20px]">
-                            {unsavedFiles.includes(fileName) && activeFileName !== fileName ? (
-                              <div className="w-2.5 h-2.5 rounded-full bg-[#616161]/40" />
-                            ) : unsavedFiles.includes(fileName) && activeFileName === fileName ? (
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: isShared ? projectColor : '#007acc' }} />
-                            ) : null}
+                    {/* Scroll Area */}
+                    <div 
+                      ref={tabsContainerRef}
+                      onScroll={checkTabOverflow}
+                      className="flex-1 h-full flex items-center overflow-x-auto tab-scrollbar scroll-smooth"
+                      onWheel={(e) => {
+                        if (e.deltaY !== 0) {
+                          e.currentTarget.scrollLeft += e.deltaY;
+                        }
+                      }}
+                    >
+                      {(openFiles.length > 0 ? openFiles : (activeFileName ? [activeFileName] : [])).filter(f => f !== 'Walkthrough: Task').map((fileName) => {
+                        const isShared = fileName.startsWith('shared-')
+                        const parts = fileName.split('/')
+                        const baseName = parts.pop()
+                        let projectColor = ''
+                        
+                        if (isShared) {
+                          const nodeId = parts[0].replace('shared-', '')
+                          const proj = openSharedProjects.find(p => p.nodeId === nodeId)
+                          projectColor = proj?.color || '#007acc'
+                        }
 
-                            <X 
-                              size={16} 
-                              strokeWidth={2.5}
-                              className={`text-[#616161] hover:bg-[#e5e5e5] rounded p-0.5 transition-all duration-200 ${
-                                unsavedFiles.includes(fileName) ? 'hidden group-hover:block' : 'opacity-0 group-hover:opacity-100'
-                              } ${activeFileName === fileName && !unsavedFiles.includes(fileName) ? 'opacity-100' : ''}`} 
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                closeFile(fileName)
-                              }}
-                            />
+                        const isActive = activeFileName === fileName
+
+                        return (
+                          <div 
+                            key={fileName}
+                            onClick={() => setActiveFileName(fileName)}
+                            className={`h-full flex items-center px-4 border-r border-[#e5e5e5] cursor-pointer text-[13px] transition-none w-auto group flex-shrink-0 relative ${
+                              isActive 
+                              ? `bg-white border-t-2 text-[#333333] font-semibold active-tab` 
+                              : `${isShared ? 'bg-[#f3f3f3] text-[#616161]' : 'bg-transparent text-[#616161]'} hover:bg-[#ebebeb] font-medium`
+                            }`}
+                            style={{ 
+                               borderTopColor: isActive ? (isShared ? projectColor : themeColor) : 'transparent'
+                            }}
+                          >
+                            {isShared && !isActive && (
+                               <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ backgroundColor: projectColor, opacity: 0.5 }} />
+                            )}
+                            
+                            <div className="flex items-center gap-2 mr-3">
+                               {isShared && (
+                                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: projectColor }} />
+                               )}
+                               <span className="whitespace-nowrap">{baseName}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-center min-w-[20px]">
+                              {unsavedFiles.includes(fileName) && !isActive ? (
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#616161]/40" />
+                              ) : unsavedFiles.includes(fileName) && isActive ? (
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: isShared ? projectColor : '#007acc' }} />
+                              ) : null}
+
+                              <X 
+                                size={16} 
+                                strokeWidth={2.5}
+                                className={`text-[#616161] hover:bg-[#e5e5e5] rounded p-0.5 transition-all duration-200 ${
+                                  unsavedFiles.includes(fileName) ? 'hidden group-hover:block' : 'opacity-0 group-hover:opacity-100'
+                                } ${isActive && !unsavedFiles.includes(fileName) ? 'opacity-100' : ''}`} 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  closeFile(fileName)
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
-                    <div className="flex-1" />
+                        )
+                      })}
+                    </div>
+
+                    {/* Scroll Right Button */}
+                    {hasOverflow && (
+                      <button 
+                        disabled={!canScrollRight}
+                        onClick={() => {
+                          tabsContainerRef.current?.scrollBy({ left: 150, behavior: 'smooth' })
+                        }}
+                        className={`h-full px-2 flex items-center justify-center transition-colors border-l border-[#e5e5e5] ${
+                          canScrollRight ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
+                        }`}
+                        title="Scroll Tabs Right"
+                      >
+                        <ChevronRight size={16} strokeWidth={2.5} />
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex-1 flex overflow-hidden">
@@ -490,13 +579,6 @@ const App: React.FC = () => {
                               >
                                 {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                                 {copied ? 'Copied!' : 'Copy'}
-                              </button>
-                              
-                              <button 
-                                onClick={() => syncProjectFromDisk()} 
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-bold text-[#616161] hover:text-[#333333] hover:bg-[#f3f3f3] transition-colors border border-transparent hover:border-[#e5e5e5] uppercase"
-                              >
-                                <Eye size={14} /> Review
                               </button>
                               <button 
                                 onClick={() => setIsEditingPlan(!isEditingPlan)}
