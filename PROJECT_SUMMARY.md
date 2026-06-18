@@ -1,4 +1,4 @@
-# ⚡ CodeRush - Project Summary
+# ⚡ WebDio - Project Summary
 
 CodeRush is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. It allows developers to go from "Napkin to MVP" by leveraging local AI models and a secure, decentralized sharing protocol.
 
@@ -35,5 +35,4 @@ CodeRush is a high-performance, AI-driven IDE designed for rapid web development
 *   **UI Optimization**: Streamlined sharing controls to fit professional sidebar constraints.
 *   **Cleanup**: Robust unsharing protocol that automatically closes peer explorers when a session ends.
 
----
-*Created by Antigravity AI for e:\CodeRush*
+
