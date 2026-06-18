@@ -1,13 +1,12 @@
 # ⚡ WebDio
 
-**Napkin to MVP in 60 seconds**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/ajeyverma)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://linkedin.com/in/ajeyverma)
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=flat&logo=instagram&logoColor=white)](https://instagram.com/ajayverma097)
 
-WebDio is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. Go from idea to minimum viable product by leveraging local AI models and a secure, decentralized sharing protocol.
+WebDio is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. Go from idea to minimum viable product by leveraging AI models and a secure, decentralized sharing protocol.
 
 ## 🚀 Key Features
 
@@ -44,10 +43,6 @@ WebDio is a high-performance, AI-driven IDE designed for rapid web development a
 ### Desktop
 - **Platform**: [Electron](https://www.electronjs.org/) 33.2 with Vite integration
 - **Build**: [electron-builder](https://www.electron.build/)
-
-### Mobile (Optional)
-- **Framework**: [React Native](https://reactnative.dev/) + [Expo](https://expo.dev/)
-- **Build**: EAS (Expo Application Services)
 
 ### AI Integration
 - **Providers**: Google Generative AI (Gemini)
@@ -103,16 +98,6 @@ npm run build
 npm run preview
 ```
 
-### Running the Android App
-
-```bash
-cd WebDio-Android
-npm install
-npm run android  # If using Expo
-# or
-eas build --platform android
-```
-
 ## 📁 Project Structure
 
 ```
@@ -128,11 +113,6 @@ WebDio/
 │           ├── features/     # Feature modules (Community, etc.)
 │           ├── stores/       # Zustand state stores
 │           └── utils/        # Utility functions
-├── WebDio-Android/      # React Native Android app
-│   ├── app/                  # Expo Router navigation
-│   ├── components/           # React Native components
-│   ├── services/             # Business logic
-│   └── android/              # Native Android configuration
 ├── electron.vite.config.ts   # Electron + Vite configuration
 ├── tailwind.config.js        # Tailwind CSS configuration
 ├── tsconfig.json             # TypeScript configuration
@@ -193,10 +173,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - **LinkedIn**: [in/ajeyverma](https://linkedin.com/in/ajeyverma)
 - **Instagram**: [@ajayverma097](https://instagram.com/ajayverma097)
 - **Facebook**: [mrcurioux](https://facebook.com/mrcurioux)
-- **Email**: [ajayver110125@gmail.com](mailto:ajayver110125@gmail.com)
 
 Project Link: [https://github.com/ajeyverma/WebDio](https://github.com/ajeyverma/WebDio)
 
----
 
-**Created with ⚡ for rapid development**
