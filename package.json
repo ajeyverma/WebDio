@@ -1,9 +1,9 @@
 {
-  "name": "instantsaas",
-  "version": "1.0.0",
+  "name": "WebDio",
+  "version": "2.3.0",
   "description": "Napkin to MVP in 60 seconds",
   "main": "./out/main/index.js",
-  "author": "InstantSaaS",
+  "author": "Ajay Verma",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
