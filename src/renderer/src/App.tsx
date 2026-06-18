@@ -72,7 +72,6 @@ const App: React.FC = () => {
   const tabsContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-  const [hasOverflow, setHasOverflow] = useState(false)
 
   const checkTabOverflow = () => {
     const el = tabsContainerRef.current
@@ -81,7 +80,6 @@ const App: React.FC = () => {
       const showScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
       setCanScrollLeft(showScrollLeft)
       setCanScrollRight(showScrollRight)
-      setHasOverflow(el.scrollWidth > el.clientWidth)
     }
   }
 
@@ -219,10 +217,6 @@ const App: React.FC = () => {
     window.addEventListener('resize', checkTabOverflow)
     return () => window.removeEventListener('resize', checkTabOverflow)
   }, [openFiles])
-
-  useEffect(() => {
-    checkTabOverflow()
-  }, [hasOverflow])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -446,20 +440,18 @@ const App: React.FC = () => {
                   {/* Editor Tabs (VS Code Style) */}
                   <div className="h-[35px] bg-[#f3f3f3] flex items-center border-b border-[#e5e5e5] select-none no-drag">
                     {/* Scroll Left Button */}
-                    {hasOverflow && (
-                      <button 
-                        disabled={!canScrollLeft}
-                        onClick={() => {
-                          tabsContainerRef.current?.scrollBy({ left: -150, behavior: 'smooth' })
-                        }}
-                        className={`h-full px-2 flex items-center justify-center transition-colors border-r border-[#e5e5e5] ${
-                          canScrollLeft ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
-                        }`}
-                        title="Scroll Tabs Left"
-                      >
-                        <ChevronLeft size={16} strokeWidth={2.5} />
-                      </button>
-                    )}
+                    <button 
+                      disabled={!canScrollLeft}
+                      onClick={() => {
+                        tabsContainerRef.current?.scrollBy({ left: -150, behavior: 'smooth' })
+                      }}
+                      className={`h-full px-2 flex items-center justify-center transition-colors border-r border-[#e5e5e5] ${
+                        canScrollLeft ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
+                      }`}
+                      title="Scroll Tabs Left"
+                    >
+                      <ChevronLeft size={16} strokeWidth={2.5} />
+                    </button>
 
                     {/* Scroll Area */}
                     <div 
@@ -535,20 +527,18 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Scroll Right Button */}
-                    {hasOverflow && (
-                      <button 
-                        disabled={!canScrollRight}
-                        onClick={() => {
-                          tabsContainerRef.current?.scrollBy({ left: 150, behavior: 'smooth' })
-                        }}
-                        className={`h-full px-2 flex items-center justify-center transition-colors border-l border-[#e5e5e5] ${
-                          canScrollRight ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
-                        }`}
-                        title="Scroll Tabs Right"
-                      >
-                        <ChevronRight size={16} strokeWidth={2.5} />
-                      </button>
-                    )}
+                    <button 
+                      disabled={!canScrollRight}
+                      onClick={() => {
+                        tabsContainerRef.current?.scrollBy({ left: 150, behavior: 'smooth' })
+                      }}
+                      className={`h-full px-2 flex items-center justify-center transition-colors border-l border-[#e5e5e5] ${
+                        canScrollRight ? 'text-[#616161] hover:bg-[#e8e8e8] hover:text-[#333333]' : 'text-slate-300 cursor-not-allowed'
+                      }`}
+                      title="Scroll Tabs Right"
+                    >
+                      <ChevronRight size={16} strokeWidth={2.5} />
+                    </button>
                   </div>
 
                   <div className="flex-1 flex overflow-hidden">
