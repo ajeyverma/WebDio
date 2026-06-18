@@ -318,7 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
               {renamingPath === child.path ? (
                 <input 
                   autoFocus
-                  className="bg-white border border-[#007acc] outline-none px-1 text-[13px] w-full"
+                  className="bg-white text-[#333333] border border-[#007acc] outline-none px-1 text-[13px] w-full"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   onBlur={() => handleRename(child.path)}
@@ -362,7 +362,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
               {renamingPath === child.path ? (
                 <input 
                   autoFocus
-                  className="bg-white border border-[#007acc] outline-none px-1 text-[13px] w-full"
+                  className="bg-white text-[#333333] border border-[#007acc] outline-none px-1 text-[13px] w-full"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   onBlur={() => handleRename(child.path)}

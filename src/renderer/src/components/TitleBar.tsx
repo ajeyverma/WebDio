@@ -107,6 +107,21 @@ const MENUS: Record<string, MenuItemType[]> = {
              console.error("Failed to paste from clipboard:", err)
           }
         }
+    }},
+    { type: 'separator' },
+    { label: 'Find', shortcut: 'Ctrl+F', action: () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          editor.trigger('menu', 'actions.find', null)
+        }
+    }},
+    { label: 'Replace', shortcut: 'Ctrl+H', action: () => {
+        const editor = useAppStore.getState().editorInstance
+        if (editor) {
+          editor.focus()
+          editor.trigger('menu', 'editor.action.startFindReplaceAction', null)
+        }
     }}
   ]
 }
