@@ -17,7 +17,7 @@ export interface AppState {
   projectPath: string
   projectFiles: any[]
   activeFileName: string | null
-  openFiles: string[] 
+  openFiles: string[]
   viewMode: 'editor' | 'preview'
   showHidden: boolean
   themeColor: string
@@ -31,7 +31,7 @@ export interface AppState {
   unsavedFiles: string[]
   isJoinedCommunity: boolean
   activeTab: string
-  
+
   // --- AI State ---
   chatHistory: any[]
   currentPlan: string | null
@@ -51,7 +51,7 @@ export interface AppState {
   nodeId: string | null
 
   refreshCommunity: () => Promise<void>
-  
+
   // --- Core Actions ---
   setHasGeminiKey: (val: boolean) => void
   setActiveProvider: (provider: string) => void
@@ -70,7 +70,7 @@ export interface AppState {
   setIsCreatingFolder: (val: boolean) => void
   setEditorInstance: (editor: any) => void
   setSelectedExplorerPath: (path: string | null) => void
-  
+
   // --- AI Actions ---
   addChatMessage: (msg: any) => void
   setCurrentPlan: (plan: string | null) => void
@@ -98,11 +98,11 @@ export interface AppState {
   leaveCommunity: () => void
   closeSharedProject: (nodeId: string, projectName: string) => void
   initCommunity: () => Promise<void>
-   shareCurrentProject: (permission?: 'read' | 'write') => void
-   stopSharingProject: () => void
-   openSharedProject: (nodeId: string, projectName: string, user: string, permission: 'read' | 'write') => void
-   cycleThemeColor: () => void
-   executeFromPlan: () => Promise<void>
+  shareCurrentProject: (permission?: 'read' | 'write') => void
+  stopSharingProject: () => void
+  openSharedProject: (nodeId: string, projectName: string, user: string, permission: 'read' | 'write') => void
+  cycleThemeColor: () => void
+  executeFromPlan: () => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -156,9 +156,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ projectPath: path, selectedExplorerPath: null })
     const { settings, setSettings } = get()
     const pData = settings.projectData?.[path]
-    set({ 
-      currentPlan: pData?.plan || null, 
-      currentTask: pData?.task || null 
+    set({
+      currentPlan: pData?.plan || null,
+      currentTask: pData?.task || null
     })
     setSettings({ ...settings, lastProjectPath: path })
   },
@@ -189,7 +189,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setIsCreatingFolder: (val) => set({ isCreatingFolder: val }),
   setEditorInstance: (editor) => set({ editorInstance: editor }),
   setSelectedExplorerPath: (path) => set({ selectedExplorerPath: path }),
-  
+
   addChatMessage: (msg) => set(state => ({ chatHistory: [...state.chatHistory, msg] })),
   setCurrentPlan: (plan) => {
     set({ currentPlan: plan })
@@ -217,15 +217,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     const settings = await window.api.getSettings()
     if (settings) {
       const lastPath = settings.lastProjectPath || ''
-      set({ 
-        settings, 
+      set({
+        settings,
         hasGeminiKey: !!settings.geminiKey,
         themeColor: settings.themeColor || '#007acc',
         projectPath: lastPath,
         currentPlan: (lastPath && settings.projectData?.[lastPath]?.plan) || null,
         currentTask: (lastPath && settings.projectData?.[lastPath]?.task) || null
       })
-      
+
       if (lastPath) {
         // @ts-ignore
         const files = await window.api.readProject(settings.lastProjectPath)
@@ -243,9 +243,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
   fetchGeminiModels: async (key) => {
-     // @ts-ignore
-     const models = await window.api.fetchGeminiModels(key)
-     if (models) set({ availableGeminiModels: models })
+    // @ts-ignore
+    const models = await window.api.fetchGeminiModels(key)
+    if (models) set({ availableGeminiModels: models })
   },
 
   saveProjectFiles: async () => {
@@ -305,23 +305,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   revertFiles: async (previousFiles: any[]) => {
     const state = get()
     if (state.projectPath) {
-       const currentFiles = state.projectFiles
-       const filesToDelete = currentFiles.filter(c => !previousFiles.some(p => p.name === c.name))
-       
-       for (const f of filesToDelete) {
-         // @ts-ignore
-         const targetPath = await window.api.join(state.projectPath, f.name)
-         // @ts-ignore
-         await window.api.deleteEntry(targetPath)
-       }
-       
-       // @ts-ignore
-       await window.api.writeProject(state.projectPath, previousFiles)
-       await get().syncProjectFromDisk()
-       get().addChatMessage({ role: 'agent', content: '⏪ Reverted workspace to the state before that generation.', type: 'code' })
+      const currentFiles = state.projectFiles
+      const filesToDelete = currentFiles.filter(c => !previousFiles.some(p => p.name === c.name))
+
+      for (const f of filesToDelete) {
+        // @ts-ignore
+        const targetPath = await window.api.join(state.projectPath, f.name)
+        // @ts-ignore
+        await window.api.deleteEntry(targetPath)
+      }
+
+      // @ts-ignore
+      await window.api.writeProject(state.projectPath, previousFiles)
+      await get().syncProjectFromDisk()
+      get().addChatMessage({ role: 'agent', content: '⏪ Reverted workspace to the state before that generation.', type: 'code' })
     } else {
-       set({ projectFiles: previousFiles })
-       get().addChatMessage({ role: 'agent', content: '⏪ Reverted memory files to the state before that generation.', type: 'code' })
+      set({ projectFiles: previousFiles })
+      get().addChatMessage({ role: 'agent', content: '⏪ Reverted memory files to the state before that generation.', type: 'code' })
     }
   },
   generateTaskFromPlan: async () => {
@@ -330,7 +330,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({ isCreatingTask: true })
     try {
-      const taskPrompt = `You are Antigravity, a world-class senior AI coding assistant.
+      const taskPrompt = `You are WebDio, a world-class senior AI coding assistant.
 Your task is to convert an APPLICATION IMPLEMENTATION PLAN into a single, highly specific CODER TASK.
 
 STRATEGIC CONTEXT (THE PLAN):
@@ -371,7 +371,7 @@ IMPORTANT:
       // @ts-ignore
       const task = await window.api.aiChat({ prompt: taskPrompt })
       set({ currentTask: task, viewMode: 'editor', isPlanMode: false })
-      
+
       const { projectPath, settings: currentSettings, setSettings } = get()
       if (projectPath) {
         const projectData = { ...(currentSettings.projectData || {}) }
@@ -511,191 +511,193 @@ Build the complete multi-file website now based on the plan above.`
     set({ isJoinedCommunity: false, communityUsers: [], communityMessages: [] })
   },
   closeSharedProject: (nodeId, projectName) => {
-     set(state => {
-        const nextActive = state.activeFileName?.startsWith(`shared-${nodeId}/`) ? (state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`))[0] || null) : state.activeFileName
-        return {
-           openSharedProjects: state.openSharedProjects.filter(p => !(p.nodeId === nodeId && p.projectName === projectName)),
-           openFiles: state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`)),
-           activeFileName: nextActive,
-           selectedExplorerPath: nextActive
-        }
-     })
+    set(state => {
+      const nextActive = state.activeFileName?.startsWith(`shared-${nodeId}/`) ? (state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`))[0] || null) : state.activeFileName
+      return {
+        openSharedProjects: state.openSharedProjects.filter(p => !(p.nodeId === nodeId && p.projectName === projectName)),
+        openFiles: state.openFiles.filter(f => !f.startsWith(`shared-${nodeId}/`)),
+        activeFileName: nextActive,
+        selectedExplorerPath: nextActive
+      }
+    })
   },
   initCommunity: async () => {
     // @ts-ignore
     window.api.onProjectChanged(() => {
-       get().syncProjectFromDisk()
+      get().syncProjectFromDisk()
     })
 
     // @ts-ignore
     window.api.onCommunityStatus((status) => set({ communityStatus: status }))
     // @ts-ignore
     window.api.onCommunityPeer((peer) => set(state => {
-       if (peer.name === 'Guest') return state
-       const newUsers = Array.from(new Set([...state.communityUsers, peer.name]))
-       return { communityUsers: newUsers }
+      if (peer.name === 'Guest') return state
+      const newUsers = Array.from(new Set([...state.communityUsers, peer.name]))
+      return { communityUsers: newUsers }
     }))
     // @ts-ignore
     window.api.onCommunityMessage((msg) => {
-       const state = get()
-        if (msg.type === 'project-unshare') {
-           set(state => ({
-              sharedProjects: state.sharedProjects.filter(p => !(p.projectName === msg.projectName && p.nodeId === msg.ownerId)),
-              openSharedProjects: state.openSharedProjects.filter(p => !(p.projectName === msg.projectName && p.nodeId === msg.ownerId))
-           }))
-           return
+      const state = get()
+      if (msg.type === 'project-unshare') {
+        set(state => ({
+          sharedProjects: state.sharedProjects.filter(p => !(p.projectName === msg.projectName && p.nodeId === msg.ownerId)),
+          openSharedProjects: state.openSharedProjects.filter(p => !(p.projectName === msg.projectName && p.nodeId === msg.ownerId))
+        }))
+        return
+      }
+
+      if (msg.type === 'project-list-request') {
+        const myProj = state.sharedProjects.find(p => p.nodeId === 'me')
+        if (myProj) {
+          // Re-broadcast my project info
+          // @ts-ignore
+          window.api.sendCommunityMessage({
+            type: 'project-share',
+            projectName: myProj.projectName,
+            user: state.communityName || 'Guest',
+            ownerId: state.nodeId,
+            permission: myProj.permission,
+            id: Math.random().toString(36).substring(7)
+          })
         }
+        return
+      }
 
-        if (msg.type === 'project-list-request') {
-           const myProj = state.sharedProjects.find(p => p.nodeId === 'me')
-           if (myProj) {
-              // Re-broadcast my project info
-              // @ts-ignore
-              window.api.sendCommunityMessage({
-                 type: 'project-share',
-                 projectName: myProj.projectName,
-                 user: state.communityName || 'Guest',
-                 ownerId: state.nodeId,
-                 permission: myProj.permission,
-                 id: Math.random().toString(36).substring(7)
-              })
-           }
-           return
+      if (msg.type === 'project-share') {
+        const exists = state.sharedProjects.some(p => p.projectName === msg.projectName && p.user === msg.user && p.nodeId === msg.ownerId)
+        if (!exists) {
+          set({
+            sharedProjects: [...state.sharedProjects, {
+              nodeId: msg.ownerId,
+              projectName: msg.projectName,
+              user: msg.user,
+              permission: msg.permission || 'read'
+            }]
+          })
         }
+        return
+      }
 
-        if (msg.type === 'project-share') {
-          const exists = state.sharedProjects.some(p => p.projectName === msg.projectName && p.user === msg.user && p.nodeId === msg.ownerId)
-          if (!exists) {
-            set({ sharedProjects: [...state.sharedProjects, { 
-              nodeId: msg.ownerId, 
-              projectName: msg.projectName, 
-              user: msg.user, 
-              permission: msg.permission || 'read' 
-            }] })
-          }
-          return
+      if (msg.type === 'project-request-tree') {
+        const currentProjectName = state.projectPath?.split(/[\\/]/).pop()
+        // Target check via nodeId
+        if (msg.toId === state.nodeId && msg.projectName === currentProjectName) {
+          // Respond with our project files
+          // @ts-ignore
+          window.api.sendCommunityMessage({
+            type: 'project-tree',
+            projectName: currentProjectName,
+            user: state.communityName || 'Guest',
+            fromId: state.nodeId,
+            requesterId: msg.requesterId, // direct back to requester
+            files: state.projectFiles
+          })
         }
+        return
+      }
 
-       if (msg.type === 'project-request-tree') {
-         const currentProjectName = state.projectPath?.split(/[\\/]/).pop()
-         // Target check via nodeId
-         if (msg.toId === state.nodeId && msg.projectName === currentProjectName) {
-           // Respond with our project files
-           // @ts-ignore
-           window.api.sendCommunityMessage({
-             type: 'project-tree',
-             projectName: currentProjectName,
-             user: state.communityName || 'Guest',
-             fromId: state.nodeId,
-             requesterId: msg.requesterId, // direct back to requester
-             files: state.projectFiles
-           })
-         }
-         return
-       }
+      if (msg.type === 'project-tree') {
+        // Update openSharedProjects if this matches the ownerId we requested
+        const targetIdx = state.openSharedProjects.findIndex(p => p.projectName === msg.projectName && p.nodeId === msg.fromId)
+        if (targetIdx !== -1) {
+          const updated = [...state.openSharedProjects]
+          updated[targetIdx] = { ...updated[targetIdx], files: msg.files }
+          set({ openSharedProjects: updated })
+        }
+        return
+      }
 
-       if (msg.type === 'project-tree') {
-         // Update openSharedProjects if this matches the ownerId we requested
-         const targetIdx = state.openSharedProjects.findIndex(p => p.projectName === msg.projectName && p.nodeId === msg.fromId)
-         if (targetIdx !== -1) {
-            const updated = [...state.openSharedProjects]
-            updated[targetIdx] = { ...updated[targetIdx], files: msg.files }
-            set({ openSharedProjects: updated })
-         }
-         return
-       }
-
-       const exists = state.communityMessages.some(m => m.id === msg.id)
-       if (exists) return
-       set({ communityMessages: [...state.communityMessages, msg] })
+      const exists = state.communityMessages.some(m => m.id === msg.id)
+      if (exists) return
+      set({ communityMessages: [...state.communityMessages, msg] })
     })
     // @ts-ignore
     const info = await window.api.getCommunityInfo()
     if (info) {
-       set({ serverIp: info.localIp, communityStatus: info.status, nodeId: info.nodeId })
+      set({ serverIp: info.localIp, communityStatus: info.status, nodeId: info.nodeId })
     }
   },
-  
-  shareCurrentProject: (permission: 'read' | 'write' = 'read') => {
-     const state = get()
-     const projectPath = state.projectPath
-     if (!projectPath) return
 
-     const projectName = projectPath.split(/[\\/]/).pop() || 'Unnamed Project'
-     const payload = {
-        type: 'project-share',
-        projectName,
-        user: state.communityName || 'Guest',
-        ownerId: state.nodeId,
-        permission,
-        id: Math.random().toString(36).substring(7)
-     }
-     
-     // @ts-ignore
-     window.api.sendCommunityMessage(payload)
-     
-     set(state => ({
-        sharedProjects: [...state.sharedProjects, { nodeId: 'me', projectName, user: state.communityName || 'Guest', permission }]
-     }))
+  shareCurrentProject: (permission: 'read' | 'write' = 'read') => {
+    const state = get()
+    const projectPath = state.projectPath
+    if (!projectPath) return
+
+    const projectName = projectPath.split(/[\\/]/).pop() || 'Unnamed Project'
+    const payload = {
+      type: 'project-share',
+      projectName,
+      user: state.communityName || 'Guest',
+      ownerId: state.nodeId,
+      permission,
+      id: Math.random().toString(36).substring(7)
+    }
+
+    // @ts-ignore
+    window.api.sendCommunityMessage(payload)
+
+    set(state => ({
+      sharedProjects: [...state.sharedProjects, { nodeId: 'me', projectName, user: state.communityName || 'Guest', permission }]
+    }))
   },
 
   stopSharingProject: () => {
-     const state = get()
-     const myShared = state.sharedProjects.find(p => p.nodeId === 'me')
-     if (!myShared) return
+    const state = get()
+    const myShared = state.sharedProjects.find(p => p.nodeId === 'me')
+    if (!myShared) return
 
-     const payload = {
-        type: 'project-unshare',
-        projectName: myShared.projectName,
-        ownerId: state.nodeId,
-        id: Math.random().toString(36).substring(7)
-     }
+    const payload = {
+      type: 'project-unshare',
+      projectName: myShared.projectName,
+      ownerId: state.nodeId,
+      id: Math.random().toString(36).substring(7)
+    }
 
-     // @ts-ignore
-     window.api.sendCommunityMessage(payload)
-     
-     set(state => ({
-        sharedProjects: state.sharedProjects.filter(p => p.nodeId !== 'me')
-     }))
+    // @ts-ignore
+    window.api.sendCommunityMessage(payload)
+
+    set(state => ({
+      sharedProjects: state.sharedProjects.filter(p => p.nodeId !== 'me')
+    }))
   },
 
   openSharedProject: (nodeId: string, projectName: string, user: string, permission: 'read' | 'write') => {
-     const state = get()
-     const exists = state.openSharedProjects.some(p => p.projectName === projectName && p.nodeId === nodeId)
-     if (!exists) {
-        const requesterId = Math.random().toString(36).substring(7)
-        const colors = [
-          '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', 
-          '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', 
-          '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722',
-          '#795548', '#607d8b'
-        ]
-        // Use a more deterministic way to pick a color based on the project name/nodeId 
-        // to avoid simple sequential overlaps
-        const hash = (projectName + nodeId).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        const color = colors[hash % colors.length]
-        
-        set(state => ({
-           openSharedProjects: [...state.openSharedProjects, { nodeId, projectName, user, files: [], permission, color }]
-        }))
-        // Request the project tree
-        const payload = { type: 'project-request-tree', toId: nodeId, projectName, requesterId }
-        // @ts-ignore
-        window.api.sendCommunityMessage(payload)
-     }
+    const state = get()
+    const exists = state.openSharedProjects.some(p => p.projectName === projectName && p.nodeId === nodeId)
+    if (!exists) {
+      const requesterId = Math.random().toString(36).substring(7)
+      const colors = [
+        '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3',
+        '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a',
+        '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722',
+        '#795548', '#607d8b'
+      ]
+      // Use a more deterministic way to pick a color based on the project name/nodeId 
+      // to avoid simple sequential overlaps
+      const hash = (projectName + nodeId).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      const color = colors[hash % colors.length]
+
+      set(state => ({
+        openSharedProjects: [...state.openSharedProjects, { nodeId, projectName, user, files: [], permission, color }]
+      }))
+      // Request the project tree
+      const payload = { type: 'project-request-tree', toId: nodeId, projectName, requesterId }
+      // @ts-ignore
+      window.api.sendCommunityMessage(payload)
+    }
   },
 
   refreshCommunity: async () => {
     // @ts-ignore
     await window.api.refreshCommunity()
-    
+
     // Request current shared projects from others
     // @ts-ignore
     window.api.sendCommunityMessage({ type: 'project-list-request' })
 
-    set(state => ({ 
-       sharedProjects: state.sharedProjects.filter(p => p.nodeId === 'me'),
-       openSharedProjects: [] 
+    set(state => ({
+      sharedProjects: state.sharedProjects.filter(p => p.nodeId === 'me'),
+      openSharedProjects: []
     }))
   }
 }))
