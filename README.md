@@ -98,25 +98,33 @@ npm run build
 npm run preview
 ```
 
-## 📁 Project Structure
+## 📁 Project Structure (public-facing)
 
 ```
-WebDio/
-├── src/
-│   ├── main/                 # Electron main process
-│   │   ├── index.ts
-│   │   └── services/         # IPC services (AI, Community, Project, Server, Settings)
-│   ├── preload/              # Electron preload scripts
-│   └── renderer/             # React UI
+WebDio/                          # Project root
+├── README.md                    # Project overview, install, usage
+├── LICENSE                      # License (MIT)
+├── CONTRIBUTING.md              # Contribution guidelines
+├── package.json                 # Scripts & dependencies
+├── tsconfig.json                # TypeScript config
+├── electron.vite.config.ts      # Electron + Vite build config
+├── src/                         # Source code
+│   ├── main/                    # Electron main process
+│   │   ├── index.ts             # Electron main entry
+│   │   └── services/            # IPC services
+│   ├── preload/                 # Preload scripts
+│   │   └── index.ts             # Preload entry
+│   └── renderer/                # Renderer (UI)
+│       ├── index.html           # Renderer HTML entry
 │       └── src/
-│           ├── components/   # Reusable UI components
-│           ├── features/     # Feature modules (Community, etc.)
-│           ├── stores/       # Zustand state stores
-│           └── utils/        # Utility functions
-├── electron.vite.config.ts   # Electron + Vite configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-├── tsconfig.json             # TypeScript configuration
-└── package.json              # Project dependencies
+│           ├── main.tsx         # Renderer entry
+│           ├── App.tsx          # Root React component
+│           ├── components/      # UI components
+│           ├── features/        # Feature modules
+│           │   └── Community/    # Community feature
+│           ├── stores/          # Zustand stores
+│           └── utils/           # Utility helpers
+└── .gitignore                    # Recommended (keep sensitive files out)
 ```
 
 ## 🔌 Key Components
@@ -164,7 +172,9 @@ Distributed under the MIT License. See the [LICENSE](LICENSE) file for more info
 
 ## 👥 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing and opening a Pull Request.
+
+Please feel free to submit a Pull Request.
 
 ## 📧 Contact
 
