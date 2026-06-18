@@ -1,6 +1,6 @@
 # ⚡ WebDio - Project Summary
 
-CodeRush is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. It allows developers to go from "Napkin to MVP" by leveraging local AI models and a secure, decentralized sharing protocol.
+WebDio is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. It allows developers to go from "Napkin to MVP".
 
 ## 🚀 Key Features
 

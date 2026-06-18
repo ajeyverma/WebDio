@@ -29,7 +29,7 @@ Source: "dist\win-unpacked\webdio.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\win-unpacked\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\InstantSaaS"; Filename: "{app}\webdio.exe"
+Name: "{group}\WebDio"; Filename: "{app}\webdio.exe"
 Name: "{group}\{cm:UninstallProgram,WebDio}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\WebDio"; Filename: "{app}\webdio.exe"; Tasks: desktopicon
 

@@ -29,7 +29,7 @@ function getSettingsPath(): string {
   } catch (err) {
     // Fallback for cases where app might not be fully ready yet
     const home = process.env.HOME || process.env.USERPROFILE || '.'
-    return path.join(home, '.instantsaas', 'settings.json')
+    return path.join(home, '.webdio', 'settings.json')
   }
 }
 
@@ -52,7 +52,7 @@ export function saveSettings(settings: AISettings): void {
   const settingsPath = getSettingsPath()
   try {
     if (!settings) return;
-    
+
     // Basic cleanup
     if (settings.geminiKey) settings.geminiKey = settings.geminiKey.trim()
 

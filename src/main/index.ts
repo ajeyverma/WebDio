@@ -26,7 +26,7 @@ function createWindow(): void {
     console.log('ready-to-show fired')
     mainWindow.maximize()
   })
-  
+
   // Call init immediately instead of waiting for ready-to-show to prevent IPC missing handler
   communityService.init(mainWindow)
 
@@ -43,7 +43,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.instantsaas.app')
+  electronApp.setAppUserModelId('com.WebDio.app')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -92,7 +92,7 @@ ipcMain.handle('settings:set', async (_event, settings) => {
     hasGeminiKey: !!settings.geminiKey,
     activeProvider: settings.activeProvider
   })
-  
+
   try {
     saveSettings(settings)
     return { success: true }

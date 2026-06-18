@@ -2,7 +2,12 @@
 
 **Napkin to MVP in 60 seconds**
 
-CodeRush is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. Go from idea to minimum viable product by leveraging local AI models and a secure, decentralized sharing protocol.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/ajeyverma)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://linkedin.com/in/ajeyverma)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=flat&logo=instagram&logoColor=white)](https://instagram.com/ajayverma097)
+
+WebDio is a high-performance, AI-driven IDE designed for rapid web development and real-time P2P collaboration. Go from idea to minimum viable product by leveraging local AI models and a secure, decentralized sharing protocol.
 
 ## 🚀 Key Features
 
@@ -59,7 +64,7 @@ CodeRush is a high-performance, AI-driven IDE designed for rapid web development
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd InstantSaaS
+cd WebDio
 ```
 
 2. **Install dependencies**
@@ -101,7 +106,7 @@ npm run preview
 ### Running the Android App
 
 ```bash
-cd InstantSaaS-Android
+cd WebDio-Android
 npm install
 npm run android  # If using Expo
 # or
@@ -111,7 +116,7 @@ eas build --platform android
 ## 📁 Project Structure
 
 ```
-InstantSaaS/
+WebDio/
 ├── src/
 │   ├── main/                 # Electron main process
 │   │   ├── index.ts
@@ -123,7 +128,7 @@ InstantSaaS/
 │           ├── features/     # Feature modules (Community, etc.)
 │           ├── stores/       # Zustand state stores
 │           └── utils/        # Utility functions
-├── InstantSaaS-Android/      # React Native Android app
+├── WebDio-Android/      # React Native Android app
 │   ├── app/                  # Expo Router navigation
 │   ├── components/           # React Native components
 │   ├── services/             # Business logic
@@ -175,7 +180,7 @@ The app supports TypeScript with full source maps for debugging. Use DevTools:
 
 ## 📝 License
 
-[Your License Here]
+Distributed under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
 ## 👥 Contributing
 
@@ -183,7 +188,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📧 Contact
 
-For questions or support, please reach out through [your contact method].
+**Ajay Chaudhary (Ajay Verma)**
+- **GitHub**: [@ajeyverma](https://github.com/ajeyverma)
+- **LinkedIn**: [in/ajeyverma](https://linkedin.com/in/ajeyverma)
+- **Instagram**: [@ajayverma097](https://instagram.com/ajayverma097)
+- **Facebook**: [mrcurioux](https://facebook.com/mrcurioux)
+- **Email**: [ajayver110125@gmail.com](mailto:ajayver110125@gmail.com)
+
+Project Link: [https://github.com/ajeyverma/WebDio](https://github.com/ajeyverma/WebDio)
 
 ---
 

@@ -34,12 +34,12 @@ web-build/
 .eas/
 
 # Android
-InstantSaaS-Android/android/.gradle/
-InstantSaaS-Android/android/.idea/
-InstantSaaS-Android/android/local.properties
-InstantSaaS-Android/android/app/release/
-InstantSaaS-Android/android/build/
-InstantSaaS-Android/android/gradle/
+WebDio-Android/android/.gradle/
+WebDio-Android/android/.idea/
+WebDio-Android/android/local.properties
+WebDio-Android/android/app/release/
+WebDio-Android/android/build/
+WebDio-Android/android/gradle/
 
 # IDE and Editor
 .vscode/
