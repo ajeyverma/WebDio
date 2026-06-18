@@ -87,12 +87,71 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
   // File Ops State
   const [renamingPath, setRenamingPath] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
-  const [copiedEntry, setCopiedEntry] = useState<{ path: string, type: 'file' | 'folder' } | null>(null)
+  const [copiedEntry, setCopiedEntry] = useState<{ path: string, type: 'file' | 'folder', operation: 'copy' | 'cut' } | null>(null)
 
   const [newFileName, setNewFileName] = useState('')
   const [newFolderName, setNewFolderName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
+
+  const [draggedOverPath, setDraggedOverPath] = useState<string | null>(null)
+
+  const handleDragStart = (e: React.DragEvent, path: string) => {
+    e.dataTransfer.setData('text/plain', path)
+    e.stopPropagation()
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDragEnter = (e: React.DragEvent, path: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDraggedOverPath(path)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDraggedOverPath(null)
+  }
+
+  const handleDropEntry = async (e: React.DragEvent, targetPath: string, targetType: 'file' | 'folder') => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDraggedOverPath(null)
+    
+    const srcRelativePath = e.dataTransfer.getData('text/plain')
+    if (!srcRelativePath || srcRelativePath === targetPath) return
+    if (!projectPath) return
+
+    // @ts-ignore
+    const oldFullPath = window.api.join(projectPath, srcRelativePath)
+    // @ts-ignore
+    const fileName = window.api.basename(oldFullPath)
+
+    let destFolderPath = targetPath
+    if (targetType === 'file') {
+      const parts = targetPath.split('/')
+      parts.pop()
+      destFolderPath = parts.join('/')
+    }
+
+    if (destFolderPath === srcRelativePath || destFolderPath.startsWith(srcRelativePath + '/')) {
+      return
+    }
+
+    // @ts-ignore
+    const newFullPath = window.api.join(projectPath, destFolderPath, fileName)
+
+    // @ts-ignore
+    const success = await window.api.renameEntry(oldFullPath, newFullPath)
+    if (success) {
+      syncProjectFromDisk()
+    }
+  }
 
   useEffect(() => {
     if (isCreatingFile) {
@@ -219,12 +278,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
 
     return sortedChildren.map(child => {
       const isActive = activeFileName === child.path
+      const isCut = copiedEntry && copiedEntry.path === child.path && copiedEntry.operation === 'cut'
       return (
         <div key={child.path}>
           {child.type === 'folder' ? (
             <div 
-              className={`flex items-center gap-1 px-4 py-[3px] cursor-pointer ${isActive ? 'bg-[#007acc] text-white' : 'hover:bg-[#e8e8e8] text-[#616161]'}`}
-              style={{ paddingLeft: `${(depth * 12) + 12}px` }}
+              draggable
+              onDragStart={(e) => handleDragStart(e, child.path)}
+              onDragOver={handleDragOver}
+              onDragEnter={(e) => handleDragEnter(e, child.path)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDropEntry(e, child.path, 'folder')}
+              className={`flex items-center gap-1 px-4 py-[3px] cursor-pointer ${
+                isActive ? 'bg-[#007acc] text-white' : 
+                draggedOverPath === child.path ? 'bg-sky-100 border-y border-[#007acc]/30' : 'hover:bg-[#e8e8e8] text-[#616161]'
+              }`}
+              style={{ paddingLeft: `${(depth * 12) + 12}px`, opacity: isCut ? 0.5 : 1 }}
               onClick={() => toggleFolder(child.path)}
               onContextMenu={(e) => {
                 e.preventDefault()
@@ -255,6 +324,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
             </div>
           ) : (
             <button 
+              draggable
+              onDragStart={(e) => handleDragStart(e, child.path)}
+              onDragOver={handleDragOver}
+              onDragEnter={(e) => handleDragEnter(e, child.path)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDropEntry(e, child.path, 'file')}
               onContextMenu={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -265,9 +340,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                 setViewMode('editor')
               }}
               className={`w-full text-left flex items-center justify-start gap-2 py-[3px] transition-none outline-none group ${
-                isActive ? 'bg-[#007acc] text-white' : 'text-[#616161] hover:bg-[#e8e8e8]'
+                isActive ? 'bg-[#007acc] text-white' : 
+                draggedOverPath === child.path ? 'bg-sky-50' : 'text-[#616161] hover:bg-[#e8e8e8]'
               }`}
-              style={{ paddingLeft: `${(depth * 12) + 26}px` }}
+              style={{ paddingLeft: `${(depth * 12) + 26}px`, opacity: isCut ? 0.5 : 1 }}
             >
               <span className="flex-shrink-0">
                 {getFileIcon(child.name, child.color)}
@@ -338,10 +414,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
      // @ts-ignore
      const destFullPath = window.api.join(destDir, fileName)
 
-     // @ts-ignore
-     const success = await window.api.copyEntry(srcFullPath, destFullPath)
-     if (success) {
-        syncProjectFromDisk()
+     if (copiedEntry.operation === 'cut') {
+        // @ts-ignore
+        const success = await window.api.renameEntry(srcFullPath, destFullPath)
+        if (success) {
+           syncProjectFromDisk()
+           setCopiedEntry(null)
+        }
+     } else {
+        // @ts-ignore
+        const success = await window.api.copyEntry(srcFullPath, destFullPath)
+        if (success) {
+           syncProjectFromDisk()
+        }
      }
   }
 
@@ -421,8 +506,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
               <div className="flex-1 overflow-y-auto pb-4 doc-scrollbar">
                 {/* Project Title Row */}
                 <div 
-                  className="flex items-center gap-1 px-2 py-1 bg-[#e5e5e5]/50 border-b border-[#e5e5e5] cursor-pointer"
+                  className={`flex items-center gap-1 px-2 py-1 border-b cursor-pointer ${
+                    draggedOverPath === 'root-dir' ? 'bg-sky-100 border-[#007acc]/40' : 'bg-[#e5e5e5]/50 border-[#e5e5e5]'
+                  }`}
                   onClick={() => toggleFolder('root')}
+                  onDragOver={handleDragOver}
+                  onDragEnter={(e) => handleDragEnter(e, 'root-dir')}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDropEntry(e, '', 'folder')}
                 >
                   {expandedFolders.has('root') ? <ChevronDown size={14} className="text-[#616161]" /> : <ChevronRight size={14} className="text-[#616161]" />}
                   <span className="text-[11px] font-bold text-[#333333] uppercase truncate">
@@ -810,7 +901,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
           </button>
           <button 
             onClick={() => {
-              setCopiedEntry({ path: contextMenu.path, type: contextMenu.type })
+              setCopiedEntry({ path: contextMenu.path, type: contextMenu.type, operation: 'cut' })
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-4 py-1.5 text-[12px] text-[#333333] hover:bg-[#007acc] hover:text-white transition-none"
+          >
+            Cut
+          </button>
+          <button 
+            onClick={() => {
+              setCopiedEntry({ path: contextMenu.path, type: contextMenu.type, operation: 'copy' })
               setContextMenu(null)
             }}
             className="w-full text-left px-4 py-1.5 text-[12px] text-[#333333] hover:bg-[#007acc] hover:text-white transition-none"
