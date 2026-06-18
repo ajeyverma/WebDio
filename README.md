@@ -165,6 +165,7 @@ The app supports TypeScript with full source maps for debugging. Use DevTools:
 
 - **Decentralized**: No central server or data collection
 - **Granular Permissions**: Control read/write access on a per-project basis
+ - **AI Provider Keys**: AI provider API keys are not included in the repository; configure them locally per provider's documentation (for example via environment variables) and avoid committing secrets to the repo.
 
 ## 📝 License
 
