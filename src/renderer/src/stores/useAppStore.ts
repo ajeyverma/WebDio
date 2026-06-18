@@ -24,6 +24,8 @@ export interface AppState {
   isLoading: boolean
   isCreatingTask: boolean
   isExecuting: boolean
+  isCreatingFile: boolean
+  isCreatingFolder: boolean
   unsavedFiles: string[]
   isJoinedCommunity: boolean
   activeTab: string
@@ -62,6 +64,8 @@ export interface AppState {
   setThemeColor: (color: string) => void
   setLoading: (loading: boolean) => void
   setActiveTab: (tab: string) => void
+  setIsCreatingFile: (val: boolean) => void
+  setIsCreatingFolder: (val: boolean) => void
   
   // --- AI Actions ---
   addChatMessage: (msg: any) => void
@@ -76,7 +80,8 @@ export interface AppState {
   // --- Project Actions ---
   syncProjectFromDisk: () => Promise<void>
   openProject: () => Promise<void>
-  createNewFile: (name: string) => Promise<void>
+  createNewFile: (name?: string) => Promise<void>
+  createNewFolder: (name?: string) => Promise<void>
   generateTaskFromPlan: () => Promise<void>
   revertFiles: (previousFiles: any[]) => Promise<void>
 
@@ -112,6 +117,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
   isCreatingTask: false,
   isExecuting: false,
+  isCreatingFile: false,
+  isCreatingFolder: false,
   unsavedFiles: [],
   isJoinedCommunity: false,
   activeTab: 'home',
@@ -171,6 +178,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setLoading: (loading) => set({ isLoading: loading }),
   setActiveTab: (tab) => set({ activeTab: tab }),
+  setIsCreatingFile: (val) => set({ isCreatingFile: val }),
+  setIsCreatingFolder: (val) => set({ isCreatingFolder: val }),
   
   addChatMessage: (msg) => set(state => ({ chatHistory: [...state.chatHistory, msg] })),
   setCurrentPlan: (plan) => {
@@ -264,13 +273,24 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   createNewFile: async (name) => {
     const { projectPath, syncProjectFromDisk } = get()
-    if (!projectPath) return
+    if (!projectPath || !name) return
+
     // @ts-ignore
     const success = await window.api.writeFile(projectPath, name, '')
     if (success) {
       await syncProjectFromDisk()
       get().setActiveFileName(name)
       set({ viewMode: 'editor' })
+    }
+  },
+  createNewFolder: async (name) => {
+    const { projectPath, syncProjectFromDisk } = get()
+    if (!projectPath || !name) return
+
+    // @ts-ignore
+    const success = await window.api.createFolder(projectPath, name)
+    if (success) {
+      await syncProjectFromDisk()
     }
   },
   revertFiles: async (previousFiles: any[]) => {

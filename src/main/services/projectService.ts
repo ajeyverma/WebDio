@@ -6,6 +6,7 @@ export interface ProjectFile {
   name: string // This will now represent the RELATIVE path (e.g., "src/App.js")
   content: string
   language: string
+  isDirectory?: boolean
 }
 
 const IGNORE_DIRS = ['node_modules', '.DS_Store', 'dist', 'out', '.next']
@@ -36,6 +37,7 @@ const walkDir = (basePath: string, currentPath: string, fileList: ProjectFile[] 
     const relativePath = path.relative(basePath, fullPath).replace(/\\/g, '/')
 
     if (stats.isDirectory()) {
+      fileList.push({ name: relativePath, content: '', language: '', isDirectory: true })
       walkDir(basePath, fullPath, fileList)
     } else if (stats.isFile()) {
       const ext = path.extname(item).toLowerCase()
@@ -81,8 +83,15 @@ export const writeProject = async (projectPath: string, files: ProjectFile[]) =>
 
   for (const file of files) {
     const fullPath = path.join(projectPath, file.name)
-    const dirPath = path.dirname(fullPath)
 
+    if (file.isDirectory) {
+      if (!fs.existsSync(fullPath)) {
+        fs.mkdirSync(fullPath, { recursive: true })
+      }
+      continue
+    }
+
+    const dirPath = path.dirname(fullPath)
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true })
     }
@@ -170,4 +179,16 @@ export const watchProject = (projectPath: string, callback: () => void) => {
   })
 
   return watcher
+}
+
+/**
+ * Create a new directory
+ */
+export const createDirectory = async (projectPath: string, folderName: string) => {
+  const fullPath = path.join(projectPath, folderName)
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath, { recursive: true })
+    return true
+  }
+  return false
 }

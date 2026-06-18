@@ -14,6 +14,7 @@ const api = {
   readProject: (path: string) => ipcRenderer.invoke('project:read', path),
   writeProject: (path: string, files: any[]) => ipcRenderer.invoke('project:write', { path, files }),
   writeFile: (path: string, fileName: string, content: string) => ipcRenderer.invoke('project:write-file', { path, fileName, content }),
+  createFolder: (path: string, folderName: string) => ipcRenderer.invoke('project:create-folder', { path, folderName }),
   renameEntry: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs:rename', { oldPath, newPath }),
   deleteEntry: (targetPath: string) => ipcRenderer.invoke('fs:delete', targetPath),
   copyEntry: (srcPath: string, destPath: string) => ipcRenderer.invoke('fs:copy', { srcPath, destPath }),

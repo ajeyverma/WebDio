@@ -63,7 +63,7 @@ app.on('window-all-closed', () => {
 // IPC Handlers
 import { generateCode, fetchGeminiModels } from './services/aiService'
 import { getSettings, saveSettings } from './services/settingsService'
-import { selectFolder, readProject, writeProject, writeFile, renameEntry, deleteEntry, copyEntry } from './services/projectService'
+import { selectFolder, readProject, writeProject, writeFile, renameEntry, deleteEntry, copyEntry, createDirectory } from './services/projectService'
 import { communityService } from './services/communityService'
 
 ipcMain.handle('ai:chat', async (_event, { imageB64, imageBase64, prompt }) => {
@@ -116,7 +116,7 @@ ipcMain.handle('project:select-folder', async () => {
   return await selectFolder(window)
 })
 
-import { selectFolder, readProject, writeProject, writeFile, renameEntry, deleteEntry, copyEntry, watchProject } from './services/projectService'
+import { selectFolder, readProject, writeProject, writeFile, renameEntry, deleteEntry, copyEntry, watchProject, createDirectory } from './services/projectService'
 
 let projectWatcher: any = null
 
@@ -139,6 +139,10 @@ ipcMain.handle('project:write', async (_event, { path, files }) => {
 
 ipcMain.handle('project:write-file', async (_event, { path, fileName, content }) => {
   return await writeFile(path, fileName, content)
+})
+
+ipcMain.handle('project:create-folder', async (_event, { path, folderName }) => {
+  return await createDirectory(path, folderName)
 })
 
 ipcMain.handle('fs:rename', async (_event, { oldPath, newPath }) => {

@@ -6,7 +6,33 @@ type MenuItemType = { label?: string; shortcut?: string; action?: () => void; di
 
 const MENUS: Record<string, MenuItemType[]> = {
   File: [
-    { label: 'New File', shortcut: 'Ctrl+N', action: () => useAppStore.getState().createNewFile() },
+    { 
+      label: 'New File', 
+      shortcut: 'Ctrl+N', 
+      action: () => {
+        const store = useAppStore.getState()
+        if (store.projectPath) {
+          store.setActiveTab('home')
+          store.setIsCreatingFile(true)
+          store.setIsCreatingFolder(false)
+        } else {
+          alert("Please open a project folder first.")
+        }
+      }
+    },
+    { 
+      label: 'New Folder', 
+      action: () => {
+        const store = useAppStore.getState()
+        if (store.projectPath) {
+          store.setActiveTab('home')
+          store.setIsCreatingFolder(true)
+          store.setIsCreatingFile(false)
+        } else {
+          alert("Please open a project folder first.")
+        }
+      }
+    },
     { type: 'separator' },
     { label: 'Open Folder...', shortcut: 'Ctrl+K Ctrl+O', action: () => useAppStore.getState().openProject() },
     { type: 'separator' },

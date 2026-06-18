@@ -16,6 +16,7 @@ import {
   EyeOff, 
   ListChecks, 
   FilePlus,
+  FolderPlus,
   Trash2,
   Copy,
   MoreVertical,
@@ -59,6 +60,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
     themeColor,
     openProject,
     createNewFile,
+    createNewFolder,
+    isCreatingFile,
+    setIsCreatingFile,
+    isCreatingFolder,
+    setIsCreatingFolder,
     shareCurrentProject,
     stopSharingProject,
     sharedProjects,
@@ -83,15 +89,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
   const [newName, setNewName] = useState('')
   const [copiedEntry, setCopiedEntry] = useState<{ path: string, type: 'file' | 'folder' } | null>(null)
 
-  const [isCreatingFile, setIsCreatingFile] = useState(false)
   const [newFileName, setNewFileName] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const folderInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (isCreatingFile) {
        inputRef.current?.focus()
     }
   }, [isCreatingFile])
+
+  useEffect(() => {
+    if (isCreatingFolder) {
+       folderInputRef.current?.focus()
+    }
+  }, [isCreatingFolder])
 
   useEffect(() => {
     const handleClose = () => setContextMenu(null)
@@ -138,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
           current.children[part] = {
             name: part,
             path: currentPath,
-            type: isLast ? 'file' : 'folder',
+            type: (isLast && !file.isDirectory) ? 'file' : 'folder',
             children: {}
           }
         }
@@ -171,7 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
             current.children[part] = {
               name: part,
               path: currentPath,
-              type: isLast ? 'file' : 'folder',
+              type: (isLast && !file.isDirectory) ? 'file' : 'folder',
               children: {},
               color: proj.color
             }
@@ -362,13 +375,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                >
                  <RotateCw size={14} />
                </button>
-                <button 
-                  onClick={() => setIsCreatingFile(true)}
-                  className="p-1 text-[#616161] hover:text-[#333333] hover:bg-[#e5e5e5] rounded transition-none"
-                  title="New File"
-                >
-                  <Plus size={14} />
-                </button>
+                 <button 
+                   onClick={() => {
+                     setIsCreatingFile(true)
+                     setIsCreatingFolder(false)
+                   }}
+                   className="p-1 text-[#616161] hover:text-[#333333] hover:bg-[#e5e5e5] rounded transition-none"
+                   title="New File"
+                 >
+                   <FilePlus size={14} />
+                 </button>
+                 <button 
+                   onClick={() => {
+                     setIsCreatingFolder(true)
+                     setIsCreatingFile(false)
+                   }}
+                   className="p-1 text-[#616161] hover:text-[#333333] hover:bg-[#e5e5e5] rounded transition-none"
+                   title="New Folder"
+                 >
+                   <FolderPlus size={14} />
+                 </button>
              </>
            ) : activeTab === 'share' ? (
              <button 
@@ -443,6 +469,31 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
                              }
                            }}
                            placeholder="File name..."
+                           className="flex-1 bg-transparent border-none outline-none text-[12px] text-[#333333] italic"
+                         />
+                       </div>
+                     )}
+
+                     {isCreatingFolder && (
+                       <div className="flex items-center gap-2 px-6 py-1 bg-white border border-[#007acc] mx-2 my-1 shadow-sm rounded-sm">
+                         <Folder size={14} className="text-[#007acc]" />
+                         <input 
+                           ref={folderInputRef}
+                           type="text" 
+                           value={newFolderName}
+                           onChange={(e) => setNewFolderName(e.target.value)}
+                           onBlur={() => setIsCreatingFolder(false)}
+                           onKeyDown={(e) => {
+                             if (e.key === 'Enter' && newFolderName.trim()) {
+                               createNewFolder(newFolderName)
+                               setIsCreatingFolder(false)
+                               setNewFolderName('')
+                             } else if (e.key === 'Escape') {
+                               setIsCreatingFolder(false)
+                               setNewFolderName('')
+                             }
+                           }}
+                           placeholder="Folder name..."
                            className="flex-1 bg-transparent border-none outline-none text-[12px] text-[#333333] italic"
                          />
                        </div>
@@ -694,6 +745,35 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, width = 256, onResizeStart
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onContextMenu={e => e.preventDefault()}
         >
+          {contextMenu.type === 'folder' && (
+            <>
+              <button 
+                onClick={() => {
+                  const name = prompt("Enter file name:")
+                  if (name && name.trim()) {
+                     createNewFile(`${contextMenu.path}/${name}`)
+                  }
+                  setContextMenu(null)
+                }}
+                className="w-full text-left px-4 py-1.5 text-[12px] text-[#333333] hover:bg-[#007acc] hover:text-white transition-none"
+              >
+                New File...
+              </button>
+              <button 
+                onClick={() => {
+                  const name = prompt("Enter folder name:")
+                  if (name && name.trim()) {
+                     createNewFolder(`${contextMenu.path}/${name}`)
+                  }
+                  setContextMenu(null)
+                }}
+                className="w-full text-left px-4 py-1.5 text-[12px] text-[#333333] hover:bg-[#007acc] hover:text-white transition-none"
+              >
+                New Folder...
+              </button>
+              <div className="h-[1px] bg-[#e5e5e5] my-1" />
+            </>
+          )}
           <button 
             onClick={() => {
               navigator.clipboard.writeText(contextMenu.path)
