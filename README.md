@@ -1,4 +1,4 @@
-# ⚡ CodeRush
+# ⚡ WebDio
 
 **Napkin to MVP in 60 seconds**
 
