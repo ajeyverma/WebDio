@@ -16,7 +16,7 @@ CodeRush is a high-performance, AI-driven IDE designed for rapid web development
 *   **Tabbed Interface**: Distinguish between local and shared files using intuitive color indicators and project tags.
 
 ### 🤖 AI-Powered Productivity
-*   **Multi-Provider Support**: Integration with Google Gemini, Ollama (Local), and OpenRouter.
+*   **AI Command Center**: Integrated with Google Gemini for intelligent assistance.
 *   **Walkthroughs**: Built-in system for generating development plans and executing builds from requirements.
 *   **AI Chat Panel**: Context-aware assistance for debugging and feature implementation.
 

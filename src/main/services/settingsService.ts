@@ -2,14 +2,12 @@ import { app } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 
-export type AIProvider = 'gemini' | 'ollama'
+export type AIProvider = 'gemini'
 
 export interface AISettings {
   activeProvider: AIProvider
   geminiKey: string
   geminiModel: string
-  ollamaEndpoint: string
-  ollamaModel: string
   themeColor?: string
   lastProjectPath?: string
   projectData?: Record<string, { plan?: string, task?: string }>
@@ -19,8 +17,6 @@ const defaultSettings: AISettings = {
   activeProvider: 'gemini',
   geminiKey: '',
   geminiModel: 'gemini-1.5-flash',
-  ollamaEndpoint: 'http://localhost:11434',
-  ollamaModel: '',
   themeColor: '#007acc',
   projectData: {}
 }

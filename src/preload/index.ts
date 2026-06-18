@@ -7,7 +7,6 @@ const api = {
   aiChat: (data: any) => ipcRenderer.invoke('ai:chat', data),
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (settings: any) => ipcRenderer.invoke('settings:set', settings),
-  detectOllama: () => ipcRenderer.invoke('ai:detect-ollama'),
   fetchGeminiModels: (key: string) => ipcRenderer.invoke('ai:fetch-gemini-models', key),
   
   // Project APIs

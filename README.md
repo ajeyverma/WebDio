@@ -18,7 +18,7 @@ CodeRush is a high-performance, AI-driven IDE designed for rapid web development
 - **Tabbed Interface**: Distinguish between local and shared files with color indicators and project tags
 
 ### 🤖 AI-Powered Productivity
-- **Multi-Provider Support**: Integration with Google Gemini, Ollama (Local), and OpenRouter
+- **Google Gemini**: Full integration with Gemini for code generation and assistance
 - **Walkthroughs**: Built-in system for generating development plans and executing builds from requirements
 - **Context-Aware Chat**: AI chat panel for debugging and feature implementation assistance
 
@@ -45,7 +45,7 @@ CodeRush is a high-performance, AI-driven IDE designed for rapid web development
 - **Build**: EAS (Expo Application Services)
 
 ### AI Integration
-- **Providers**: Google Generative AI, Ollama (local models), OpenRouter
+- **Providers**: Google Generative AI (Gemini)
 - **HTTP Client**: Axios
 
 ## 📦 Installation
@@ -172,7 +172,6 @@ The app supports TypeScript with full source maps for debugging. Use DevTools:
 
 - **Decentralized**: No central server or data collection
 - **Granular Permissions**: Control read/write access on a per-project basis
-- **Local AI**: Support for running AI models locally with Ollama
 
 ## 📝 License
 

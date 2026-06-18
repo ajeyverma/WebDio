@@ -61,7 +61,7 @@ app.on('window-all-closed', () => {
 })
 
 // IPC Handlers
-import { generateCode, detectOllama, fetchGeminiModels } from './services/aiService'
+import { generateCode, fetchGeminiModels } from './services/aiService'
 import { getSettings, saveSettings } from './services/settingsService'
 import { selectFolder, readProject, writeProject, writeFile, renameEntry, deleteEntry, copyEntry } from './services/projectService'
 import { communityService } from './services/communityService'
@@ -70,9 +70,7 @@ ipcMain.handle('ai:chat', async (_event, { imageB64, imageBase64, prompt }) => {
   return await generateCode(imageB64 || imageBase64, prompt)
 })
 
-ipcMain.handle('ai:detect-ollama', async () => {
-  return await detectOllama()
-})
+
 
 ipcMain.handle('ai:fetch-gemini-models', async (_event, key) => {
   return await fetchGeminiModels(key)

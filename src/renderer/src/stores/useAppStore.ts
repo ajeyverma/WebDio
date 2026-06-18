@@ -1,13 +1,11 @@
 import { create } from 'zustand'
 
-export type AIProvider = 'gemini' | 'ollama'
+export type AIProvider = 'gemini'
 
 export interface AISettings {
   activeProvider: AIProvider
   geminiKey: string
   geminiModel: string
-  ollamaEndpoint: string
-  ollamaModel: string
 }
 
 export interface AppState {
@@ -26,7 +24,6 @@ export interface AppState {
   isLoading: boolean
   isCreatingTask: boolean
   isExecuting: boolean
-  isOllamaRunning: boolean
   unsavedFiles: string[]
   isJoinedCommunity: boolean
   activeTab: string
@@ -36,7 +33,6 @@ export interface AppState {
   currentPlan: string | null
   currentTask: string | null
   isPlanMode: boolean
-  availableOllamaModels: string[]
   availableGeminiModels: string[]
   settings: AISettings
 
@@ -71,7 +67,6 @@ export interface AppState {
   addChatMessage: (msg: any) => void
   setCurrentPlan: (plan: string | null) => void
   setIsPlanMode: (val: boolean) => void
-  refreshOllama: () => Promise<void>
   loadSettings: () => Promise<void>
   setSettings: (newSettings: AISettings) => Promise<void>
   fetchGeminiModels: (key: string) => Promise<void>
@@ -117,7 +112,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
   isCreatingTask: false,
   isExecuting: false,
-  isOllamaRunning: false,
   unsavedFiles: [],
   isJoinedCommunity: false,
   activeTab: 'home',
@@ -125,14 +119,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentPlan: null,
   currentTask: null,
   isPlanMode: false,
-  availableOllamaModels: [],
   availableGeminiModels: [],
   settings: {
     activeProvider: 'gemini',
     geminiKey: '',
-    geminiModel: 'gemini-1.5-flash',
-    ollamaEndpoint: 'http://localhost:11434',
-    ollamaModel: 'llama3'
+    geminiModel: 'gemini-1.5-flash'
   },
   serverIp: '127.0.0.1',
   communityStatus: 'Scanning...',
@@ -223,9 +214,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ projectFiles: files })
       }
 
-      if (settings.activeProvider === 'ollama') {
-         get().refreshOllama()
-      }
+
     }
   },
   setSettings: async (newSettings) => {
@@ -240,16 +229,7 @@ export const useAppStore = create<AppState>((set, get) => ({
      const models = await window.api.fetchGeminiModels(key)
      if (models) set({ availableGeminiModels: models })
   },
-  refreshOllama: async () => {
-    // @ts-ignore
-    const result = await window.api.detectOllama()
-    set({ isOllamaRunning: result.running })
-    if (result.running) {
-       set({ availableOllamaModels: result.models }) 
-    } else {
-       set({ availableOllamaModels: [] })
-    }
-  },
+
   saveProjectFiles: async () => {
     const { projectPath, projectFiles } = get()
     if (!projectPath) return

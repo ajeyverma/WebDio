@@ -15,17 +15,7 @@ export async function fetchGeminiModels(key: string): Promise<string[]> {
   }
 }
 
-export async function detectOllama(): Promise<{ running: boolean; models: string[] }> {
-  const settings = getSettings()
-  try {
-    const endpoint = settings.ollamaEndpoint?.replace(/\/+$/, '') || 'http://localhost:11434'
-    const response = await axios.get(`${endpoint}/api/tags`)
-    const models = response.data.models.map((m: any) => m.name)
-    return { running: true, models }
-  } catch (err) {
-    return { running: false, models: [] }
-  }
-}
+
 
 export async function generateCode(imageB64: string, prompt: string): Promise<string> {
   const settings = getSettings()
@@ -57,22 +47,7 @@ export async function generateCode(imageB64: string, prompt: string): Promise<st
     return cleaned
   }
 
-  if (activeProvider === 'ollama') {
-    if (!settings.ollamaModel || settings.ollamaModel.trim() === '') {
-      throw new Error('Ollama model is not selected. Please configure it in AI Settings.')
-    }
-    const endpoint = settings.ollamaEndpoint?.replace(/\/+$/, '') || 'http://localhost:11434'
-    const payload: any = {
-      model: settings.ollamaModel,
-      prompt: prompt,
-      stream: false
-    }
-    if (imageB64) {
-      payload.images = [imageB64.split(',')[1] || imageB64]
-    }
-    const response = await axios.post(`${endpoint}/api/generate`, payload)
-    return response.data.response
-  }
+
 
   throw new Error('Unsupported provider')
 }

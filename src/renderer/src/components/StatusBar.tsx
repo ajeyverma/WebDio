@@ -3,7 +3,7 @@ import { Check, Info, Sparkles, Rss, Layers, Cpu, Bell, MonitorDot, ChevronDown,
 import { useAppStore } from '../stores/useAppStore'
 
 const StatusBar: React.FC = () => {
-  const { settings, isOllamaRunning, communityStatus, serverIp } = useAppStore()
+  const { settings, communityStatus, serverIp } = useAppStore()
 
   return (
     <div className="h-[22px] w-full bg-[#007acc] text-white flex items-center justify-between px-3 text-[12px] font-normal select-none z-50 transition-colors">
@@ -31,12 +31,8 @@ const StatusBar: React.FC = () => {
       {/* Right side: AI & Editor Settings */}
       <div className="flex items-center h-full gap-0">
         <div className="flex items-center gap-1.5 px-3 hover:bg-white/10 h-full cursor-pointer transition-none">
-           <div className={`w-1.5 h-1.5 rounded-full ${settings.activeProvider === 'ollama' && isOllamaRunning ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'bg-white/30'}`} />
-           <span>
-             {settings.activeProvider === 'gemini' 
-               ? settings.geminiModel 
-               : settings.ollamaModel}
-           </span>
+           <Sparkles size={11} className="text-white/70" />
+           <span>{settings.geminiModel}</span>
         </div>
       </div>
     </div>

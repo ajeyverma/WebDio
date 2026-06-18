@@ -19,7 +19,6 @@ const App: React.FC = () => {
   const {
     initCommunity,
     loadSettings,
-    refreshOllama,
     projectFiles,
     setProjectFiles,
     activeFileName,
@@ -174,7 +173,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadSettings()
-    refreshOllama()
   }, [])
 
   const handleGenerationComplete = (code: string, image: string | null) => {
