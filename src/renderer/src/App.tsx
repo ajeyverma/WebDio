@@ -66,6 +66,7 @@ const App: React.FC = () => {
   const [copied, setCopied] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [isEditingPlan, setIsEditingPlan] = useState(false)
   const dragCounter = useRef(0)
 
   const handleToggleSidebar = (_tab: string) => {
@@ -188,6 +189,12 @@ const App: React.FC = () => {
   useEffect(() => {
     loadSettings()
   }, [])
+
+  useEffect(() => {
+    if (activeFileName !== 'Walkthrough: Plan') {
+      setIsEditingPlan(false)
+    }
+  }, [activeFileName])
 
   const handleGenerationComplete = (code: string, image: string | null) => {
     setGeneratedCode(code)
@@ -492,6 +499,23 @@ const App: React.FC = () => {
                                 <Eye size={14} /> Review
                               </button>
                               <button 
+                                onClick={() => setIsEditingPlan(!isEditingPlan)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-bold transition-colors border border-transparent hover:border-[#e5e5e5] uppercase ${
+                                  isEditingPlan ? 'text-[#007acc] bg-sky-100' : 'text-[#616161] hover:text-[#333333] hover:bg-[#f3f3f3]'
+                                }`}
+                                title={isEditingPlan ? 'Switch to Preview Mode' : 'Switch to Edit Plan'}
+                              >
+                                {isEditingPlan ? (
+                                  <>
+                                    <Eye size={14} /> Preview
+                                  </>
+                                ) : (
+                                  <>
+                                    <Code size={14} /> Edit Plan
+                                  </>
+                                )}
+                              </button>
+                              <button 
                                 onClick={() => useAppStore.getState().executeFromPlan()}
                                 disabled={useAppStore.getState().isExecuting}
                                 className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold text-white bg-gradient-to-r from-[#007acc] to-[#005a96] hover:from-[#0062a3] hover:to-[#004e82] shadow-sm transition-colors uppercase ml-2 active:scale-95 disabled:opacity-50"
@@ -503,36 +527,68 @@ const App: React.FC = () => {
                           </div>
 
                           {/* Content Area */}
-                          <div className="flex-1 overflow-y-auto bg-white doc-scrollbar relative">
-                            <div className="prose prose-slate prose-sm max-w-none py-8 px-10 min-h-full">
-                              <ReactMarkdown
-                                components={{
-                                  blockquote: ({ node, children, ...props }) => {
-                                    return (
-                                      <div className="bg-blue-50/50 border-l-[3px] border-blue-500 p-4 my-6 rounded-r-lg shadow-sm not-prose">
-                                        <div className="flex items-center gap-2 text-blue-700 font-bold mb-2 text-[12px] uppercase tracking-wider">
-                                          <AlertTriangle size={14} /> 
-                                          Important
-                                        </div>
-                                        <div className="text-blue-900 text-[13px] leading-relaxed [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
-                                          {children}
-                                        </div>
-                                      </div>
-                                    )
+                          {isEditingPlan ? (
+                            <div className="flex-1 bg-white relative">
+                              <Editor
+                                height="100%"
+                                language="markdown"
+                                path="WalkthroughPlan.md"
+                                value={currentPlan || ''}
+                                theme="vs-light"
+                                options={{
+                                  automaticLayout: true,
+                                  fontSize: 14,
+                                  minimap: { enabled: false },
+                                  scrollBeyondLastLine: false,
+                                  wordWrap: 'on',
+                                  lineNumbers: 'on',
+                                  fontFamily: 'Consolas, "Courier New", monospace',
+                                  scrollbar: {
+                                    vertical: 'visible',
+                                    horizontal: 'visible',
+                                    useShadows: false,
+                                    verticalScrollbarSize: 10,
+                                    horizontalScrollbarSize: 10
                                   }
                                 }}
-                              >
-                                {(currentPlan || 'No plan generated yet.').replace(/>\s*\[!IMPORTANT\]\s*\n?/gi, '').replace(/\[!IMPORTANT\]/gi, '')}
-                              </ReactMarkdown>
+                                onChange={(val) => {
+                                  if (val !== undefined) {
+                                    useAppStore.getState().setCurrentPlan(val)
+                                  }
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1 overflow-y-auto bg-white doc-scrollbar relative">
+                              <div className="prose prose-slate prose-sm max-w-none py-8 px-10 min-h-full">
+                                <ReactMarkdown
+                                  components={{
+                                    blockquote: ({ node, children, ...props }) => {
+                                      return (
+                                        <div className="bg-blue-50/50 border-l-[3px] border-blue-500 p-4 my-6 rounded-r-lg shadow-sm not-prose">
+                                          <div className="flex items-center gap-2 text-blue-700 font-bold mb-2 text-[12px] uppercase tracking-wider">
+                                            <AlertTriangle size={14} /> 
+                                            Important
+                                          </div>
+                                          <div className="text-blue-900 text-[13px] leading-relaxed [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+                                            {children}
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                  }}
+                                >
+                                  {(currentPlan || 'No plan generated yet.').replace(/>\s*\[!IMPORTANT\]\s*\n?/gi, '').replace(/\[!IMPORTANT\]/gi, '')}
+                                </ReactMarkdown>
 
-                              {/* Task Result — shown inline below the plan */}
-                              {useAppStore.getState().currentTask && (
-                                <div className="mt-10">
-                                  <div className="flex items-center gap-2 mb-4">
-                                    <Terminal size={15} className="text-[#007acc]" />
-                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#333333]">Generated Task</span>
-                                  </div>
-                                  <div className="font-mono text-[13px] bg-[#1e1e1e] border border-[#333333] rounded-xl p-8 shadow-2xl text-[#d4d4d4] leading-relaxed whitespace-pre-wrap not-prose">
+                                {/* Task Result — shown inline below the plan */}
+                                {useAppStore.getState().currentTask && (
+                                  <div className="mt-10">
+                                    <div className="flex items-center gap-2 mb-4">
+                                      <Terminal size={15} className="text-[#007acc]" />
+                                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#333333]">Generated Task</span>
+                                    </div>
+                                    <div className="font-mono text-[13px] bg-[#1e1e1e] border border-[#333333] rounded-xl p-8 shadow-2xl text-[#d4d4d4] leading-relaxed whitespace-pre-wrap not-prose">
                                     <div className="flex items-center gap-2 mb-6 pb-4 border-b border-[#333333]">
                                       <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
                                       <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
@@ -545,7 +601,8 @@ const App: React.FC = () => {
                               )}
                             </div>
                           </div>
-                        </div>
+                        )}
+                      </div>
                       ) : activeFileName === 'Community: Global Chat' ? (
                         <CommunityChat />
                       ) : (
