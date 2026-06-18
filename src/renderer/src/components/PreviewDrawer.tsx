@@ -32,6 +32,7 @@ const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ code, image, onClose, onC
   const [isChatOpen, setIsChatOpen] = useState(true)
   const [chatInput, setChatInput] = useState('')
   const [isRefining, setIsRefining] = useState(false)
+  const [editorInst, setEditorInst] = useState<any>(null)
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'assistant', 
@@ -47,6 +48,16 @@ const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ code, image, onClose, onC
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (editorInst) {
+      editorInst.layout()
+      const timer = setTimeout(() => {
+        editorInst.layout()
+      }, 250)
+      return () => clearTimeout(timer)
+    }
+  }, [isChatOpen, viewMode, editorInst])
 
   // Virtual Filesystem logic
   const files = useMemo<VirtualFile[]>(() => {
@@ -220,7 +231,7 @@ Requirements:
 
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content (Preview/Code) */}
-        <div className="flex-1 flex overflow-hidden relative">
+        <div className="flex-1 min-w-0 flex overflow-hidden relative">
           <AnimatePresence mode="wait">
             {viewMode === 'preview' ? (
               <motion.div 
@@ -274,7 +285,7 @@ Requirements:
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex-1 flex overflow-hidden"
+                className="flex-1 min-w-0 flex overflow-hidden"
               >
                 {/* File Sidebar */}
                 <div className="w-64 bg-slate-50 border-r border-slate-100 flex flex-col">
@@ -300,19 +311,30 @@ Requirements:
                    </div>
                 </div>
 
-                <div className="flex-1 bg-white relative">
+                <div className="flex-1 min-w-0 bg-white relative">
                    <Editor
                       height="100%"
                       language={activeFileData.language}
                       value={activeFileData.content}
                       theme="vs-light"
+                      onMount={(editor) => {
+                        setEditorInst(editor)
+                      }}
                       options={{
+                        automaticLayout: true,
                         fontSize: 14,
                         minimap: { enabled: false },
                         scrollBeyondLastLine: false,
                         padding: { top: 20 },
                         lineNumbers: 'on',
-                        wordWrap: 'on'
+                        wordWrap: 'off',
+                        scrollbar: {
+                          vertical: 'visible',
+                          horizontal: 'visible',
+                          useShadows: false,
+                          verticalScrollbarSize: 10,
+                          horizontalScrollbarSize: 10
+                        }
                       }}
                    />
                 </div>
@@ -328,6 +350,11 @@ Requirements:
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 340, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
+              onUpdate={() => {
+                if (editorInst) {
+                  editorInst.layout()
+                }
+              }}
               className="bg-white border-l border-slate-100 flex flex-col overflow-hidden relative shadow-[-10px_0_30px_rgba(0,0,0,0.02)]"
             >
               {/* Sidebar Header */}

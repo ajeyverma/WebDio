@@ -40,7 +40,8 @@ const App: React.FC = () => {
     openSharedProjects,
     activeTab,
     setActiveTab,
-    syncProjectFromDisk
+    syncProjectFromDisk,
+    editorInstance
   } = useAppStore()
 
   useEffect(() => {
@@ -57,6 +58,7 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [saveProjectFiles])
+
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
@@ -170,6 +172,18 @@ const App: React.FC = () => {
       document.removeEventListener('mouseup', handleMouseUp)
     }
   }, [])
+
+  useEffect(() => {
+    if (editorInstance) {
+      editorInstance.layout()
+      
+      const timer = setTimeout(() => {
+        editorInstance.layout()
+      }, 250)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isRightPanelOpen, isSidebarOpen, sidebarWidth, aiPanelWidth, editorInstance])
 
   useEffect(() => {
     loadSettings()
@@ -312,6 +326,11 @@ const App: React.FC = () => {
               animate={{ width: sidebarWidth, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.18, ease: 'easeInOut' }}
+              onUpdate={() => {
+                if (editorInstance) {
+                  editorInstance.layout()
+                }
+              }}
               style={{ overflow: 'hidden', flexShrink: 0, height: '100%', display: 'flex' }}
             >
               <Sidebar activeTab={activeTab} width={sidebarWidth} onResizeStart={(e) => {
@@ -323,7 +342,7 @@ const App: React.FC = () => {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 flex flex-col relative overflow-hidden bg-white">
+        <main className="flex-1 min-w-0 flex flex-col relative overflow-hidden bg-white">
           <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
             <AnimatePresence mode="wait">
               {(!generatedCode && !activeFileName) ? (
@@ -438,7 +457,7 @@ const App: React.FC = () => {
 
                   <div className="flex-1 flex overflow-hidden">
                      {/* Editor View */}
-                    <div className="flex-1 bg-white relative flex flex-col">
+                    <div className="flex-1 min-w-0 bg-white relative flex flex-col">
                       {activeFileName === 'Walkthrough: Plan' ? (
                         <div className="flex-1 flex flex-col bg-[#fdfdfd] overflow-hidden">
                           {/* Walkthrough Header */}
@@ -546,10 +565,11 @@ const App: React.FC = () => {
                             </div>
                           }
                           options={{
+                            automaticLayout: true,
                             fontSize: 14,
                             minimap: { enabled: true },
                             scrollBeyondLastLine: false,
-                            wordWrap: 'on',
+                            wordWrap: 'off',
                             lineNumbers: 'on',
                             fontFamily: 'Consolas, "Courier New", monospace',
                             renderLineHighlight: 'all',
@@ -603,6 +623,11 @@ const App: React.FC = () => {
               animate={{ width: aiPanelWidth, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
+              onUpdate={() => {
+                if (editorInstance) {
+                  editorInstance.layout()
+                }
+              }}
               className="bg-[#f3f3f3] border-l border-[#e5e5e5] h-full flex flex-col overflow-hidden z-20 shrink-0 relative"
             >
               {/* Resize Handle for AI Panel */}
