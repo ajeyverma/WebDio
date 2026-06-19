@@ -197,23 +197,44 @@ Output each file separated by a file marker like this:
 === FILE: app.js ===
 [full javascript content here]
 
+To DELETE a file or folder that is no longer needed, use:
+=== DELETE: path/to/file.ext ===
+or for a folder:
+=== DELETE: path/to/folder ===
+
 STRICT RULES:
 1. index.html must link to styles.css via <link rel="stylesheet" href="styles.css"> in the <head>.
 2. index.html must link to app.js via <script src="app.js"></script> at the bottom of <body>.
 3. styles.css must contain ALL styles. Pure CSS only.
 4. app.js must contain ALL JavaScript. Vanilla JS only.
 5. The design MUST be PREMIUM, MODERN, and POLISHED.
-6. DO NOT use any markdown code blocks for the output, just use the file markers.`
+6. DO NOT use any markdown code blocks for the output, just use the file markers.
+7. Use DELETE markers to remove files or folders that are obsolete or replaced.`
 
         // @ts-ignore
         const code = await window.api.aiChat({ prompt: finalPrompt, imageBase64: snapshot.image || undefined })
         const parsedFiles = parseProjectFiles(code)
+
+        // Parse DELETE markers
+        const deleteRegex = /===\s*DELETE:\s*(.+?)\s*===/g
+        const toDelete: string[] = []
+        let delMatch: RegExpExecArray | null
+        while ((delMatch = deleteRegex.exec(code)) !== null) {
+          toDelete.push(delMatch[1].trim())
+        }
         
-        if (parsedFiles.length > 0) {
+        if (parsedFiles.length > 0 || toDelete.length > 0) {
           const { projectPath, syncProjectFromDisk, projectFiles: currFiles } = useAppStore.getState()
           const stateBefore = JSON.parse(JSON.stringify(currFiles || []))
           
           if (projectPath) {
+            // Delete obsolete files/folders first
+            for (const relPath of toDelete) {
+              // @ts-ignore
+              const fullPath = window.api.join(projectPath, relPath)
+              // @ts-ignore
+              await window.api.deleteEntry(fullPath)
+            }
             for (const file of parsedFiles) {
               // @ts-ignore
               await window.api.writeFile(projectPath, file.name, file.content)
@@ -223,7 +244,10 @@ STRICT RULES:
             setProjectFiles(parsedFiles)
           }
 
-          addChatMessage({ role: 'agent', content: `✅ Successfully generated ${parsedFiles.length} files. Check your workspace!`, type: 'code', previousFiles: stateBefore })
+          const parts: string[] = []
+          if (toDelete.length > 0) parts.push(`🗑️ Deleted: ${toDelete.join(', ')}`)
+          if (parsedFiles.length > 0) parts.push(`✅ Generated ${parsedFiles.length} file(s): ${parsedFiles.map(f => f.name).join(', ')}`)
+          addChatMessage({ role: 'agent', content: parts.join('  •  ') + '  —  Check your workspace!', type: 'code', previousFiles: stateBefore })
           setActiveFileName('index.html')
           setViewMode('preview')
         } else {
@@ -339,23 +363,44 @@ Output each file separated by a file marker like this:
 === FILE: app.js ===
 [full javascript content here]
 
+To DELETE a file or folder that is no longer needed, use:
+=== DELETE: path/to/file.ext ===
+or for a folder:
+=== DELETE: path/to/folder ===
+
 STRICT RULES:
 1. index.html must link to styles.css via <link rel="stylesheet" href="styles.css"> in the <head>.
 2. index.html must link to app.js via <script src="app.js"></script> at the bottom of <body>.
 3. styles.css must contain ALL styles. Pure CSS only.
 4. app.js must contain ALL JavaScript. Vanilla JS only.
 5. The design MUST be PREMIUM, MODERN, and POLISHED.
-6. DO NOT use any markdown code blocks for the output, just use the file markers.`
+6. DO NOT use any markdown code blocks for the output, just use the file markers.
+7. Use DELETE markers to remove files or folders that are obsolete or replaced.`
 
         // @ts-ignore
         const code = await window.api.aiChat({ prompt: finalPrompt, imageBase64: savedImg || undefined })
         const parsedFiles = parseProjectFiles(code)
+
+        // Parse DELETE markers
+        const deleteRegex = /===\s*DELETE:\s*(.+?)\s*===/g
+        const toDelete: string[] = []
+        let delMatch: RegExpExecArray | null
+        while ((delMatch = deleteRegex.exec(code)) !== null) {
+          toDelete.push(delMatch[1].trim())
+        }
         
-        if (parsedFiles.length > 0) {
+        if (parsedFiles.length > 0 || toDelete.length > 0) {
           const { projectPath, syncProjectFromDisk, projectFiles: currFiles } = useAppStore.getState()
           const stateBefore = JSON.parse(JSON.stringify(currFiles || []))
 
           if (projectPath) {
+            // Delete obsolete files/folders first
+            for (const relPath of toDelete) {
+              // @ts-ignore
+              const fullPath = window.api.join(projectPath, relPath)
+              // @ts-ignore
+              await window.api.deleteEntry(fullPath)
+            }
             for (const file of parsedFiles) {
               // @ts-ignore
               await window.api.writeFile(projectPath, file.name, file.content)
@@ -365,7 +410,10 @@ STRICT RULES:
             setProjectFiles(parsedFiles)
           }
 
-          addChatMessage({ role: 'agent', content: `✅ Retry succeeded! Generated ${parsedFiles.length} files.`, type: 'code', previousFiles: stateBefore })
+          const parts: string[] = []
+          if (toDelete.length > 0) parts.push(`🗑️ Deleted: ${toDelete.join(', ')}`)
+          if (parsedFiles.length > 0) parts.push(`✅ Generated ${parsedFiles.length} file(s): ${parsedFiles.map(f => f.name).join(', ')}`)
+          addChatMessage({ role: 'agent', content: 'Retry succeeded!  •  ' + parts.join('  •  '), type: 'code', previousFiles: stateBefore })
           setActiveFileName('index.html')
           setViewMode('preview')
         } else {

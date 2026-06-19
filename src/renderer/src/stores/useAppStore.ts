@@ -414,6 +414,11 @@ Output each file separated by a file marker like this:
 
 You may also create additional files if needed (e.g. about.html, data.json) using the same === FILE: filename === marker.
 
+To DELETE a file or folder that is no longer needed, emit:
+=== DELETE: path/to/file.ext ===
+or for a folder:
+=== DELETE: path/to/folder ===
+
 STRICT RULES:
 1. index.html must link to styles.css via <link rel="stylesheet" href="styles.css"> in the <head>.
 2. index.html must link to app.js via <script src="app.js"></script> at the bottom of <body>.
@@ -429,6 +434,7 @@ STRICT RULES:
    - The result must look like a professional $10,000 agency site — NOT a default browser page
 7. All features described in the plan must be FULLY FUNCTIONAL and interactive.
 8. DO NOT use any markdown code blocks. Output ONLY the file markers and content.
+9. Use DELETE markers to remove any files or folders that are obsolete or replaced by new content.
 
 Build the complete multi-file website now based on the plan above.`
 
@@ -456,7 +462,15 @@ Build the complete multi-file website now based on the plan above.`
         }
       }
 
-      if (generatedFiles.length === 0) {
+      // Parse DELETE markers
+      const deleteRegex = /===\s*DELETE:\s*(.+?)\s*===/g
+      const toDelete: string[] = []
+      let delMatch: RegExpExecArray | null
+      while ((delMatch = deleteRegex.exec(response)) !== null) {
+        toDelete.push(delMatch[1].trim())
+      }
+
+      if (generatedFiles.length === 0 && toDelete.length === 0) {
         addChatMessage({ role: 'agent', content: "Couldn't parse a valid website from the response. Please try again.", type: 'text' })
         return
       }
@@ -465,16 +479,29 @@ Build the complete multi-file website now based on the plan above.`
 
       // Write each file to the project folder on disk (if a project is open)
       if (projectPath) {
+        // Delete obsolete files/folders first
+        for (const relPath of toDelete) {
+          // @ts-ignore
+          const fullPath = window.api.join(projectPath, relPath)
+          // @ts-ignore
+          await window.api.deleteEntry(fullPath)
+        }
         for (const file of generatedFiles) {
           // @ts-ignore
           await window.api.writeFile(projectPath, file.name, file.content)
         }
         await syncProjectFromDisk()
-        addChatMessage({ role: 'agent', content: `✅ ${generatedFiles.length} files written to project: ${generatedFiles.map(f => f.name).join(', ')}`, type: 'code', previousFiles: stateBefore })
+        const parts: string[] = []
+        if (toDelete.length > 0) parts.push(`🗑️ Deleted: ${toDelete.join(', ')}`)
+        if (generatedFiles.length > 0) parts.push(`✅ Generated ${generatedFiles.length} file(s): ${generatedFiles.map(f => f.name).join(', ')}`)
+        addChatMessage({ role: 'agent', content: parts.join('  •  ') + '  —  Check your workspace!', type: 'code', previousFiles: stateBefore })
       } else {
         // No project open — load into memory only
         setProjectFiles(generatedFiles)
-        addChatMessage({ role: 'agent', content: `✅ ${generatedFiles.length} files generated in workspace: ${generatedFiles.map(f => f.name).join(', ')}`, type: 'code', previousFiles: stateBefore })
+        const parts: string[] = []
+        if (toDelete.length > 0) parts.push(`🗑️ ${toDelete.length} deletion(s) skipped — no project open`)
+        if (generatedFiles.length > 0) parts.push(`✅ Generated ${generatedFiles.length} file(s): ${generatedFiles.map(f => f.name).join(', ')}`)
+        addChatMessage({ role: 'agent', content: parts.join('  •  ') + '  —  Check your workspace!', type: 'code', previousFiles: stateBefore })
       }
 
       setActiveFileName('index.html')
