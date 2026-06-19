@@ -57,7 +57,7 @@ WebDio is a high-performance, AI-driven IDE designed for rapid web development a
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/ajeyverma/WebDio.git
 cd WebDio
 ```
 
